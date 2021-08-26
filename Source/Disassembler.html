@@ -15,7 +15,7 @@
 
 	<label>Program Bytes as Hexadecimal:</label><br />
 	<textarea id="textareaHexadecimal" cols="32" rows="8" spellcheck="false">
-37 d5 0a d4 0a 3f 11 c0 15 81 00 15 03 02
+89 c0
 	</textarea><br />
 
 	<button onclick="buttonDisassemble_Clicked()">Disassemble</button><br />
@@ -27,11 +27,13 @@
 
 </div>
 
+<script src="AddressingMode.js"></script>
 <script src="BitStream.js"></script>
 <script src="Instruction.js"></script>
 <script src="InstructionOpcode.js"></script>
 <script src="InstructionOpcode_Instances.js"></script>
 <script src="Program.js"></script>
+<script src="Register.js"></script>
 
 <script type="text/javascript">
 
@@ -69,20 +71,26 @@ function inputFile_Changed(inputFile)
 	if (file != null)
 	{
 		var fileReader = new FileReader();
-		fileReader.onload = function(event)
+		fileReader.onload = (event) =>
 		{
 			var fileContentsAsBinaryString = event.target.result;
+
 			var fileContentsAsBytes = [];
+
 			for (var i = 0; i < fileContentsAsBinaryString.length; i++)
 			{
 				var byteRead = fileContentsAsBinaryString.charCodeAt(i);
 				fileContentsAsBytes.push(byteRead);
 			}
-			var fileContentsAsHexadecimal =
-				fileContentsAsBytes.map(x => x.toString(16)).join(" ");
+
+			var fileContentsAsHexadecimal = fileContentsAsBytes.map
+			(
+				x => x.toString(16).padStart(2, "0")
+			).join(" ");
+
 			var textareaHexadecimal =
 				document.getElementById("textareaHexadecimal");
-			textareaHexadecimal.value = fileContentsAsHexadecmial;
+			textareaHexadecimal.value = fileContentsAsHexadecimal;
 		}
 		fileReader.readAsBinaryString(file);
 	}

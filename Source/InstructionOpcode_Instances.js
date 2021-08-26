@@ -10,14 +10,105 @@ class InstructionOpcode_Instances
 	constructor()
 	{
 		var io = InstructionOpcode;
-		var _None = [];
 
 		// Common operand bit width arrays.
-		var _4_4 = [4, 4];
-		var _8 = [8];
-		var _8_8 = [8, 8];
-		var _16 = [16];
-		var _16_16 = [16, 16];
+		var _0 = (s) => []
+		var _4_4 = (s) => [ s.readBitsAsInteger(4), s.readBitsAsInteger(4) ];
+		var _8 = (s) => [ s.readBitsAsInteger(8) ];
+		var _8_8 = (s) => [ s.readBitsAsInteger(8), s.readBitsAsInteger(8) ];
+		var _8_16 =
+			(s) =>
+				[
+					s.readBytesAsIntegerLittleEndian(1),
+					s.readBytesAsIntegerLittleEndian(2)
+				];
+		var _16 = (s) => [ s.readBitsAsInteger(16) ];
+		var _16_16 = (s) => [ s.readBitsAsInteger(16), s.readBitsAsInteger(16) ];
+
+		// 8-bit operands (al, bl...) ("b" = "byte")
+
+		var _rrmb2_3_3 = (s) =>
+		{
+			var operandAddressingMode = s.readBitsAsInteger(2);
+
+			var operandsAsIntegers =
+			[
+				s.readBitsAsInteger(3),
+				s.readBitsAsInteger(3)
+			];
+
+			var operandsAsStrings = operandsAsIntegers.map(
+				x => Register.byCodeAndWidthInBits(x, 8).name
+			); // todo
+
+			if (operandAddressingMode == 0)
+			{}
+			else if (operandAddressingMode == 1)
+			{
+				// mov ax, [bx+1]
+				var offset = s.readByte();
+				operandsAsStrings[1] += "+" + offset;
+			}
+			else if (operandAddressingMode == 2)
+			{}
+			else // (operandAddressingMode == 4)
+			{}
+
+			operandsAsStrings = operandsAsStrings.map
+			(
+				x => x + (x.startsWith("[") ? "]" : "")
+			);
+
+			return operandsAsStrings;
+		}
+
+		var _rmrb2_3_3 = (s) =>
+		{
+			return _rrmb2_3_3(s).reverse();
+		}
+
+		// 16-bit operands (ax, bx...) ("w" = "word")
+
+		var _rrmw2_3_3 = (s) =>
+		{
+			var operandAddressingMode = s.readBitsAsInteger(2);
+
+			var operandsAsIntegers =
+			[
+				s.readBitsAsInteger(3),
+				s.readBitsAsInteger(3)
+			];
+
+			var operandsAsStrings = operandsAsIntegers.map
+			(
+				x => Register.byCodeAndWidthInBits(x, 16).name
+			); // todo
+
+			if (operandAddressingMode == 0)
+			{}
+			else if (operandAddressingMode == 1)
+			{
+				// mov ax, [bx+1]
+				var offset = s.readByte();
+				operandsAsStrings[1] += "+" + offset;
+			}
+			else if (operandAddressingMode == 2)
+			{}
+			else // (operandAddressingMode == 4)
+			{}
+
+			operandsAsStrings = operandsAsStrings.map
+			(
+				x => x + (x.startsWith("[") ? "]" : "")
+			);
+
+			return operandsAsStrings;
+		}
+
+		var _rmrw2_3_3 = (s) =>
+		{
+			return _rrmw2_3_3(s).reverse();
+		}
 
 		// Operand types codes used as mnemonic suffixes:
 		// ----------------------------------------------
@@ -32,49 +123,60 @@ class InstructionOpcode_Instances
 
 		this._All =
 		[
-			//     Mnemonic     Op    Opds      Description
-			//     --------     ----  ----      ---------------------------
-			new io("aaa", 		0x37, _None, 	"ascii adjust al after add"),
+			//     Mnemonic Code  Opds      Description
+			//     -------- ----  ----      ---------------------------
+			new io("aaa", 		0x37, _0, 		"ascii adjust al after add"),
 			new io("aad", 		0xD5, _8, 		"ascii adjust ax before div"), // opds: Radix.
 			new io("aam", 		0xD4, _8, 		"ascii adjust ax after mult"), // opds: Radix.
-			new io("aas", 		0x3F, _None,	"ascii adjust al after sub"), // opds: Radix.
+			new io("aas", 		0x3F, _0,		"ascii adjust al after sub"), // opds: Radix.
 
 			// Add with carry.
-			// todo - Operand bit widths from description and empirical binary don't match.
-			new io("adc_rmrb", 	0x10, _8_8, 	"add with carry r/m8 r8"),
-			new io("adc_rrw", 	0x11, _4_4, 	"add with carry r/m16 r16"), 
-			new io("adc_rrmb", 	0x12, _8_8, 	"add with carry r8 r/m8"),
-			new io("adc_rrmw", 	0x13, _16_16, 	"add with carry r16 r/m16"),
-			new io("adc_aib", 	0x14, _8, 		"add with carry al imm8"),
-			new io("adc_aiw", 	0x15, _16, 		"add with carry eax imm16"),
+			new io("adc_rmrb", 	0x10, _rmrb2_3_3, 	"add with carry r/m8 r8"),
+			new io("adc_rrw", 	0x11, _rrmw2_3_3, 	"add with carry r/m16 r16"), 
+			new io("adc_rrmb", 	0x12, _rrmb2_3_3, 	"add with carry r8 r/m8"),
+			new io("adc_rrmw", 	0x13, _rrmw2_3_3, 	"add with carry r16 r/m16"),
+			new io("adc_aib", 	0x14, _8, 			"add with carry al imm8"),
+			new io("adc_aiw", 	0x15, _16, 			"add with carry eax imm16"),
 
 			// adds
-			new io("add_rmrb", 	0x00, _8_8, 	"add r/m8 r8"),
-			new io("add_rrw", 	0x01, null, 	"add r/m16 r16"),
-			new io("add_rrmb", 	0x02, null, 	"add r8 r/m8"),
-			new io("add_rrmw", 	0x03, null, 	"add r16 r/m16"),
-			new io("add_aib", 	0x04, null, 	"add al imm8"),
-			new io("add_aiw", 	0x05, null, 	"add eAX imm16"),
+			new io("add_rmrb", 	0x00, _rmrb2_3_3, 	"add r/m8 r8"),
+			new io("add_rrw", 	0x01, _rrmw2_3_3, 	"add r/m16 r16"),
+			new io("add_rrmb", 	0x02, _rrmb2_3_3, 	"add r8 r/m8"),
+			new io("add_rrmw", 	0x03, _rrmw2_3_3, 	"add r16 r/m16"),
+			new io("add_aib", 	0x04, _8, 			"add al imm8"),
+			new io("add_aiw", 	0x05, _16, 			"add eax imm16"),
 
-			new io("and_rmrb", 	0x20, null, 	"and r/m8 r8"),
-			new io("and_rmrw", 	0x21, null, 	"and r/m16 r16"),
-			new io("and_rrmb", 	0x22, null, 	"and r8 r/m8"),
-			new io("and_rrmw", 	0x23, null, 	"and r16 r/m16"),
-			new io("and_aib", 	0x24, null, 	"and al imm8"),
-			new io("and_aiw", 	0x25, null, 	"and eax imm16"),
+			new io("and_rmrb", 	0x20, _rmrb2_3_3, 	"and r/m8 r8"),
+			new io("and_rmrw", 	0x21, _rmrw2_3_3, 	"and r/m16 r16"),
+			new io("and_rrmb", 	0x22, _rrmb2_3_3, 	"and r8 r/m8"),
+			new io("and_rrmw", 	0x23, _rrmw2_3_3, 	"and r16 r/m16"),
+			new io("and_aib", 	0x24, _8, 	"and al imm8"),
+			new io("and_aiw", 	0x25, _16, 	"and eax imm16"),
+
 			new io("arith0", 	0x80, null, 	"add,or,adc,sbb,and,sub,xor,cmp r/m8 imm8"),
 			new io("arith1", 	0x81, null, 	"add,or,adc,sbb,and,sub,xor,cmp r/m16 imm16"),
 			new io("arith2", 	0x82, null, 	"add,or,adc,sbb,and,sub,xor,cmp r/m8 imm8"),
 			new io("arith3", 	0x83, null, 	"add,or,adc,sbb,and,sub,xor,cmp r/m16 imm8"),
 			new io("arithf", 	0xD8, null, 	"add,mul,com,sub,subr,div,divr m32real"),
+
 			new io("arpl", 		0x63, null, 	"adjust rpl field of segment selector"),
+
+			// b
 			new io("bound", 	0x52, null, 	"check index against bounds"),
+
+			// c
+
 			new io("call", 		0x9A, null, 	"call procedure"), // 0xE8, 0xFF/2, 0xFF/3
 			new io("cbw", 		0x98, null, 	"convert byte to word"),
-			new io("clc", 		0xF8, _None, 	"clear carry flag"),
-			new io("cld", 		0xFC, _None, 	"clear direction flag"),
-			new io("cli", 		0xFA, _None, 	"clear interrupt flag"),
-			new io("cmc", 		0xF5, _None, 	"complement carry flag"),
+
+			// clears
+			new io("clc", 		0xF8, _0, 		"clear carry flag"),
+			new io("cld", 		0xFC, _0, 		"clear direction flag"),
+			new io("cli", 		0xFA, _0, 		"clear interrupt flag"),
+
+			new io("cmc", 		0xF5, _0, 		"complement carry flag"),
+
+			// compares
 			new io("cmp0", 		0x38, null, 	"compare r/m8 r8"), // 0x05, 0x80/0..., 0x83/0
 			new io("cmp1", 		0x39, null, 	"compare r/m16 r16"),
 			new io("cmp2", 		0x3A, null, 	"compare r8 r/m8"),
@@ -83,24 +185,38 @@ class InstructionOpcode_Instances
 			new io("cmp5", 		0x3D, null, 	"add eax imm16"),
 			new io("cmpsb", 	0xA6, null, 	"compare bytes in memory"),
 			new io("cmpsw", 	0xA7, null, 	"compare words"),
+
 			new io("cwd", 		0x99, null, 	"convert word to doubleword"),
+
+			// d
+
+			// decimal adjusts
 			new io("daa", 		0x27, null, 	"decimal adjust al after add"),
 			new io("das", 		0x2F, null, 	"decimal adjust al after sub"),
 
-			// decrements - no operands
-			new io("decr0", 	0x48, _None, 	"decrement register 0 (ax?)"),
-			new io("decr1", 	0x49, _None, 	"decrement register 1"),
-			new io("decr2", 	0x4A, _None, 	"decrement register 2"),
-			new io("decr3", 	0x4B, _None, 	"decrement register 3"),
-			new io("decr4", 	0x4C, _None, 	"decrement register 4"),
-			new io("decr5", 	0x4D, _None, 	"decrement register 5"),
-			new io("decr6", 	0x4E, _None, 	"decrement register 6"),
-			new io("decr7", 	0x4F, _None, 	"decrement register 7"),
+			// decrements
+			new io("decr0", 	0x48, _0, 		"decrement register 0 (ax?)"),
+			new io("decr1", 	0x49, _0, 		"decrement register 1"),
+			new io("decr2", 	0x4A, _0, 		"decrement register 2"),
+			new io("decr3", 	0x4B, _0, 		"decrement register 3"),
+			new io("decr4", 	0x4C, _0, 		"decrement register 4"),
+			new io("decr5", 	0x4D, _0, 		"decrement register 5"),
+			new io("decr6", 	0x4E, _0, 		"decrement register 6"),
+			new io("decr7", 	0x4F, _0, 		"decrement register 7"),
 
 			new io("div", 		0xF6, null, 	"unsigned divide"), // 0xF6/6, 0xF7/6
+
+			// e
+
 			new io("enter", 	0xC8, null, 	"make stack frame for procedure parameters"),
 			//new io("esc", ?, null, "used with floating-point unit");
+
+			// h
+
 			new io("hlt", 		0xF4, null, 	"enter halt state"),
+
+			// i
+
 			new io("idiv", 		0XF6, null, 	"signed divide"), // 0xF6/7, 0xF7/7
 			new io("imul", 		0x69, null, 	"signed multiply"), // 0x6B, 0xF6/5, 0xF7/5, 0x0FAF
 
@@ -110,30 +226,33 @@ class InstructionOpcode_Instances
 			new io("inb", 		0xE4, null, 	"input reg from port al imm8"),
 			new io("ins", 		0xE5, null, 	"input reg from port eax imm16"),
 
-			// increments - no operands
-			new io("incr0", 	0x40, _None, 	"increment r0 (ax?)"),
-			new io("incr1", 	0x41, _None, 	"increment r1"),
-			new io("incr2", 	0x42, _None, 	"increment r2"),
-			new io("incr3", 	0x43, _None, 	"increment r3"),
-			new io("incr4", 	0x44, _None, 	"increment register 4"),
-			new io("incr5", 	0x45, _None, 	"increment register 5"),
-			new io("incr6", 	0x46, _None, 	"increment register 6"),
-			new io("incr7", 	0x47, _None, 	"increment register 7"),
+			// increments
+			new io("incr0", 	0x40, _0, 		"increment r0 (ax?)"),
+			new io("incr1", 	0x41, _0, 		"increment r1"),
+			new io("incr2", 	0x42, _0, 		"increment r2"),
+			new io("incr3", 	0x43, _0, 		"increment r3"),
+			new io("incr4", 	0x44, _0, 		"increment register 4"),
+			new io("incr5", 	0x45, _0, 		"increment register 5"),
+			new io("incr6", 	0x46, _0, 		"increment register 6"),
+			new io("incr7", 	0x47, _0, 		"increment register 7"),
 
 			new io("int", 		0xCD, null, 	"call to interrupt"),
 			new io("into", 		0xCE, null, 	"call to interrupt if overflow"),
 			new io("iret", 		0xCF, null, 	"return from interrupt"),
 
+			// j
+
 			// jumps
-			new io("jmpw", 		0xE9, null, 	"jump rel16"),
-			new io("jmpf", 		0xEA, null, 	"jump ptr16:16"),
-			new io("jmpb", 		0xEB, null, 	"jump rel8"),
+			new io("jmp_w", 	0xE9, _16, 		"jump rel16"),
+			new io("jmp_f", 	0xEA, null, 	"jump ptr16:16"),
+			new io("jmp_b", 	0xEB, _8, 		"jump rel8"),
 			new io("jo", 		0x70, null, 	"jump if 0"), 
 			new io("jno", 		0x71, null, 	"jump if not 0"),
 			new io("jb/nae/c", 	0x72, null, 	"jb/nae/c"),
 			new io("jnb/ae/nc", 0x73, null, 	"jnb/ae/nc"),
-			new io("jz/e", 		0x74, null, 	"jz/e"),
-			new io("jnz/ne", 	0x75, null, 	"jnz/ne"),
+			new io("jz/e_b", 	0x74, _8, 		"jz/e_b"),
+			new io("jz/e_w", 	0x0F, _8_16, 	"jz/e_w"),
+			new io("jnz/ne", 	0x75, _8, 		"jnz/ne"),
 			new io("jbe/na", 	0x76, null, 	"jbe/na"),
 			new io("jnbe/a", 	0x77, null, 	"jnbe/a"),
 			new io("js", 		0x78, null, 	"js"),
@@ -160,30 +279,30 @@ class InstructionOpcode_Instances
 			new io("jcxz", 		0xE3, null, 	"jump if cx 0"),
 
 			// moves
-			new io("movrmrb", 	0x88, null, 	"move r/m8 r8"),
-			new io("movrmrw", 	0x89, null, 	"move r/m16 r16"),
-			new io("movrrmb", 	0x8A, null, 	"move r8 r/m8"),
-			new io("movrrmw", 	0x8B, null, 	"move r16 r/m16"),
-			new io("movrmwseg", 0x8C, [16], 	"move r/m16 Sreg"),
-			new io("movsegrmw", 0x8E, null, 	"move Sreg r/m16"),
-			new io("movsb", 	0xA4, null, 	"move byte from string to string"),
-			new io("movsw", 	0xA5, null, 	"move word from string to string"),
-			new io("movr0i8", 	0xB0, null, 	"move r0 (ax?) imm8"),
-			new io("movr1i8", 	0xB1, null, 	"move r1 imm8"),
-			new io("movr2i8", 	0xB2, null, 	"move r2 imm8"),
-			new io("movr3i8", 	0xB3, null, 	"move r3 imm8"),
-			new io("movr4i8", 	0xB4, null, 	"move r4 imm8"),
-			new io("movr5i8", 	0xB5, null, 	"move r5 imm8"),
-			new io("movr6i8", 	0xB6, null, 	"move r6 imm8"),
-			new io("movr7i8", 	0xB7, null, 	"move r7 imm8"),
-			new io("mov16r0", 	0xB8, null, 	"move r0 (ax?) imm16"),
-			new io("movr1iw", 	0xB9, null, 	"move r1 imm16"),
-			new io("movr2iw", 	0xBA, null, 	"move r2 imm16"),
-			new io("movr3iw", 	0xBB, null, 	"move r3 imm16"),
-			new io("movr4iw", 	0xBC, null, 	"move r4 imm16"),
-			new io("movr5iw", 	0xBD, null, 	"move r5 imm16"),
-			new io("movr6iw", 	0xBE, null, 	"move r6 imm16"),
-			new io("movr7iw", 	0xBF, null, 	"move r7 imm16"),
+			new io("mov_rmrb", 	0x88, _rmrb2_3_3, 	"move r/m8 r8"),
+			new io("mov_rmrw", 	0x89, _rmrw2_3_3, 	"move r/m16 r16"),
+			new io("mov_rrmb", 	0x8A, null, 		"move r8 r/m8"),
+			new io("mov_rrmw", 	0x8B, _rrmw2_3_3, 	"move r16 r/m16"),
+			new io("mov_rmwseg",0x8C, _16, 			"move r/m16 Sreg"),
+			new io("mov_segrmw",0x8E, null, 		"move Sreg r/m16"),
+			new io("mov_sb", 	0xA4, null, 		"move byte from string to string"),
+			new io("mov_sw", 	0xA5, null, 		"move word from string to string"),
+			new io("mov_r0i8", 	0xB0, null, 		"move r0 (ax?) imm8"),
+			new io("mov_r1i8", 	0xB1, null, 		"move r1 imm8"),
+			new io("mov_r2i8", 	0xB2, null, 		"move r2 imm8"),
+			new io("mov_r3i8", 	0xB3, null, 		"move r3 imm8"),
+			new io("mov_r4i8", 	0xB4, null, 		"move r4 imm8"),
+			new io("mov_r5i8", 	0xB5, null, 		"move r5 imm8"),
+			new io("mov_r6i8", 	0xB6, null, 		"move r6 imm8"),
+			new io("mov_r7i8", 	0xB7, null, 		"move r7 imm8"),
+			new io("mov_16r0", 	0xB8, null, 		"move r0 (ax?) imm16"),
+			new io("mov_r1iw", 	0xB9, null, 		"move r1 imm16"),
+			new io("mov_r2iw", 	0xBA, null, 		"move r2 imm16"),
+			new io("mov_r3iw", 	0xBB, null, 		"move r3 imm16"),
+			new io("mov_r4iw", 	0xBC, null, 		"move r4 imm16"),
+			new io("mov_r5iw", 	0xBD, null, 		"move r5 imm16"),
+			new io("mov_r6iw", 	0xBE, null, 		"move r6 imm16"),
+			new io("mov_r7iw", 	0xBF, null, 		"move r7 imm16"),
 
 			//new io("mul", ?, null, "unsigned multiply"),
 			//new io("neg", ?, null, "two's complement negation),
@@ -290,12 +409,6 @@ class InstructionOpcode_Instances
 			new io("xor5", 		0x35, null, 	"xor eax imm16")
 		];
 
-		this._OpcodesByValue = new Map();
-		for (var i = 0; i < this._All.length; i++)
-		{
-			var opcode = this._All[i];
-			var opcodeValue = opcode.value;
-			this._OpcodesByValue.set(opcodeValue, opcode);
-		}
+		this._OpcodesByValue = new Map(this._All.map(x => [x.value, x]));
 	}
 }

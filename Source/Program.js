@@ -35,31 +35,8 @@ class Program
 			}
 			else
 			{
-				var operands = [];
-				var operandWidths = opcode.operandWidthsInBits;
-				var operandBitsSoFar = 0;
-				for (var j = 0; j < operandWidths.length; j++)
-				{
-					var operandWidth = operandWidths[j];
-					var operand = null;
-
-					if (operandWidth <= 8)
-					{
-						operand = bitStream.readBitsAsInteger(operandWidth);
-					}
-					else if (operandWidth == 16)
-					{
-						operand = bitStream.readBytesAsIntegerLittleEndian(2);
-					}
-					else
-					{
-						// todo
-						throw("Unexpected operand width:" + operandWidth);
-					}
-
-					operands.push(operand);
-					operandBitsSoFar += operandWidth;
-				}
+				var operands =
+					opcode.operandsReadFromBitStream(bitStream);
 
 				var instruction = new Instruction(opcode, operands);
 				instructions.push(instruction);

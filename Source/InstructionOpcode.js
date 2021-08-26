@@ -3,13 +3,16 @@ class InstructionOpcode
 {
 	constructor
 	(
-		mnemonic, value, operandWidthsInBits, description
+		mnemonic,
+		value,
+		operandsReadFromBitStream,
+		description
 	)
 	{
 		this.mnemonic = mnemonic;
 		this.value = value;
-		this.operandWidthsInBits = 
-			operandWidthsInBits || [2, 3, 3];
+		this._operandsReadFromBitStream =
+			operandsReadFromBitStream;
 		this.description = description || "";
 	}
 
@@ -21,5 +24,26 @@ class InstructionOpcode
 				new InstructionOpcode_Instances();
 		}
 		return InstructionOpcode._instances;
+	}
+
+	operandsReadFromBitStream(bitStream)
+	{
+		var operands = null;
+
+		if (this._operandsReadFromBitStream == null)
+		{
+			throw("Not yet implemented!");
+		}
+		else
+		{
+			operands = this._operandsReadFromBitStream(bitStream);
+		}
+
+		return operands;
+	}
+
+	toString()
+	{
+		return this.mnemonic.split("_")[0];
 	}
 }

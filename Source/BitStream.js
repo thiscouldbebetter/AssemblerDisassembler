@@ -32,6 +32,19 @@ class BitStream
 		return bitRead;
 	}
 
+	readBits(numberOfBits)
+	{
+		var bitsRead = [];
+
+		for (var i = 0; i < numberOfBits; i++)
+		{
+			var bit = this.readBit();
+			bitsRead.push(bit);
+		}
+
+		return bitsRead;
+	}
+
 	readBitsAsInteger(numberOfBits)
 	{
 		var returnValue = 0;
