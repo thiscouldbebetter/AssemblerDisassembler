@@ -1,0 +1,93 @@
+<html>
+<body>
+
+<div id="divUI">
+
+	<h3>Disassembler</h3>
+
+	<p>
+		Specify an x86 binary program file to load, then click the Disassemble
+		button to convert its bytes to assembly language.
+	</p>
+	<label>Binary Program File to Load:</label>
+	<input type="file" onchange="inputFile_Changed(this);"></input>
+	<br />
+
+	<label>Program Bytes as Hexadecimal:</label><br />
+	<textarea id="textareaHexadecimal" cols="32" rows="8" spellcheck="false">
+37 d5 0a d4 0a 3f 11 c0 15 81 00 15 03 02 66 01 c0
+	</textarea><br />
+
+	<button onclick="buttonDisassemble_Clicked()">Disassemble</button><br />
+
+	<label>Program as Assembly:</label><br />
+	<textarea id="textareaAssembly" cols="16" rows="16" spellcheck="false">
+	</textarea>
+	<br />
+
+</div>
+
+<script src="BitStream.js"></script>
+<script src="Instruction.js"></script>
+<script src="InstructionOpcode.js"></script>
+<script src="InstructionOpcode_Instances.js"></script>
+<script src="Program.js"></script>
+
+<script type="text/javascript">
+
+// UI event handlers.
+
+function buttonDisassemble_Clicked()
+{
+	var d = document;
+
+	var textareaHexadecimal =
+		d.getElementById("textareaHexadecimal");
+	var textareaAssembly =
+		d.getElementById("textareaAssembly");
+
+	var fileContentsAsStringHexadecimal =
+		textareaHexadecimal.value;
+	var fileBytesAsStringsHexadecimal =
+		fileContentsAsStringHexadecimal.split(" ");
+	var fileBytes =
+		fileBytesAsStringsHexadecimal.map
+		(
+			x => parseInt(x, 16)
+		);
+
+	var program = new Program("todo", fileBytes);
+
+	var programAsAssembly = program.toStringAssembly();
+
+	textareaAssembly.value = programAsAssembly;
+}
+
+function inputFile_Changed(inputFile)
+{
+	var file = inputFile.files[0];
+	if (file != null)
+	{
+		var fileReader = new FileReader();
+		fileReader.onload = function(event)
+		{
+			var fileContentsAsBinaryString = event.target.result;
+			var fileContentsAsBytes = [];
+			for (var i = 0; i < fileContentsAsBinaryString.length; i++)
+			{
+				var byteRead = fileContentsAsBinaryString.charCodeAt(i);
+				fileContentsAsBytes.push(byteRead);
+			}
+			var fileContentsAsHexadecimal =
+				fileContentsAsBytes.map(x => x.toString(16)).join(" ");
+			var textareaHexadecimal =
+				document.getElementById("textareaHexadecimal");
+			textareaHexadecimal.value = fileContentsAsHexadecmial;
+		}
+		fileReader.readAsBinaryString(file);
+	}
+}
+
+</script>
+</body>
+</html>
