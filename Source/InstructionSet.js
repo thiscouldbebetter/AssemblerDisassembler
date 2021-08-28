@@ -1,11 +1,28 @@
 
 class InstructionSet
 {
-	constructor(name, opcodes)
+	constructor
+	(
+		name,
+		opcodes,
+		instructionFromAssemblyCode,
+		instructionReadFromBitStream
+	)
 	{
 		this.name = name;
 		this.opcodes = opcodes;
-		this._opcodesByValue = new Map(this.opcodes.map(x => [x.value, x]));
+		this._instructionFromAssemblyCode = instructionFromAssemblyCode;
+		this._instructionReadFromBitStream = instructionReadFromBitStream;
+
+		this._opcodesByMnemonic = new Map
+		(
+			this.opcodes.map(x => [x.mnemonic, x])
+		);
+
+		this._opcodesByValue = new Map
+		(
+			this.opcodes.map(x => [x.value, x])
+		);
 	}
 
 	static Instances()
@@ -20,6 +37,45 @@ class InstructionSet
 	static byName(name)
 	{
 		return InstructionSet.Instances().byName(name);
+	}
+
+	instructionFromAssemblyCode(assemblyCode)
+	{
+		var instructionRead = null;
+
+		if (this._instructionFromAssemblyCode == null)
+		{
+			throw("Not yet implemented!");
+		}
+		else
+		{
+			instructionRead =
+				this._instructionFromAssemblyCode(this, assemblyCode);
+		}
+
+		return instructionRead;
+	}
+
+	instructionReadFromBitStream(bitStream)
+	{
+		var instructionRead = null;
+
+		if (this._instructionReadFromBitStream == null)
+		{
+			throw("Not yet implemented!");
+		}
+		else
+		{
+			instructionRead =
+				this._instructionReadFromBitStream(this, bitStream);
+		}
+
+		return instructionRead;
+	}
+
+	opcodeByMnemonic(opcodeMnemonic)
+	{
+		return this._opcodesByMnemonic.get(opcodeMnemonic);
 	}
 
 	opcodeByValue(opcodeValue)

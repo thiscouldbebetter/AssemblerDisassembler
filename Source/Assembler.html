@@ -1,13 +1,15 @@
+<!DOCTYPE html>
 <html>
 <body onload="body_Loaded();">
 
 <div id="divUI">
 
-	<h3>Disassembler</h3>
+	<h3>Assembler/Disassembler</h3>
 
 	<p>
-		Specify an x86 binary program file to load, then click the Disassemble
-		button to convert its bytes to assembly language.
+		Specify an instruction set and a program file to load.
+		Then click the Assemble or Disassemble button
+		to convert assembly language to bytes or vice versa.
 	</p>
 
 	<label>Instruction Set:</label>
@@ -15,24 +17,31 @@
 	<select id="selectInstructionSet"></select>
 	<br />
 
-	<label>Binary Program File to Load:</label>
+	<label>Program as Assembly Language:</label>
 	<br />
-	<input type="file" onchange="inputFile_Changed(this);"></input>
+	<input type="file" onchange="inputFileAssembly_Changed(this);"></input>
+	<br />
+
+	<label>Program as Assembly:</label>
+	<br />
+	<textarea id="textareaAssembly" cols="16" rows="16" spellcheck="false">
+mov ax, ax
+	</textarea>
+	<br />
+
+	<button onclick="buttonAssemble_Clicked()">Assemble</button>
+	<button onclick="buttonDisassemble_Clicked()">Disassemble</button>
+	<br />
+
+	<label>Program File as Bytes:</label>
+	<br />
+	<input type="file" onchange="inputFileBinary_Changed(this);"></input>
 	<br />
 
 	<label>Program Bytes as Hexadecimal:</label>
 	<br />
 	<textarea id="textareaHexadecimal" cols="32" rows="8" spellcheck="false">
 89 c0
-	</textarea>
-	<br />
-
-	<button onclick="buttonDisassemble_Clicked()">Disassemble</button>
-	<br />
-
-	<label>Program as Assembly:</label>
-	<br />
-	<textarea id="textareaAssembly" cols="16" rows="16" spellcheck="false">
 	</textarea>
 	<br />
 
@@ -73,6 +82,33 @@ function body_Loaded()
 	);
 }
 
+function buttonAssemble_Clicked()
+{
+	var d = document;
+
+	var selectInstructionSet =
+		d.getElementById("selectInstructionSet");
+	var textareaAssembly =
+		d.getElementById("textareaAssembly");
+	var textareaHexadecimal =
+		d.getElementById("textareaHexadecimal");
+
+	var instructionSetName = selectInstructionSet.value;
+
+	var assemblyCode = textareaAssembly.value;
+
+	var program = Program.fromAssemblyCode
+	(
+		"[name]", instructionSetName, assemblyCode
+	);
+	
+	var programAsBytes = program.toBytes();
+	var programAsStringHexadecimal =
+		programAsBytes.map(x => x.toString(16)).join(" ");
+	
+	textareaHexadecimal.value = programAsStringHexadecimal;
+}
+
 function buttonDisassemble_Clicked()
 {
 	var d = document;
@@ -95,14 +131,35 @@ function buttonDisassemble_Clicked()
 			x => parseInt(x, 16)
 		);
 
-	var program = new Program("todo", instructionSetName, fileBytes);
+	var program = Program.fromBytes
+	(
+		"[name]", instructionSetName, fileBytes
+	);
 
-	var programAsAssembly = program.toStringAssembly();
+	var programAsAssembly = program.toStringAssemblyCode();
 
 	textareaAssembly.value = programAsAssembly;
 }
 
-function inputFile_Changed(inputFile)
+function inputFileAssembly_Changed(inputFile)
+{
+	var file = inputFile.files[0];
+	if (file != null)
+	{
+		var fileReader = new FileReader();
+		fileReader.onload = (event) =>
+		{
+			var fileContentsAsString = event.target.result;
+
+			var textareaAssenbly =
+				document.getElementById("textareaAssembly");
+			textareaAssembly.value = fileContentsAsString;
+		}
+		fileReader.readAsText(file);
+	}
+}
+
+function inputFileBinary_Changed(inputFile)
 {
 	var file = inputFile.files[0];
 	if (file != null)

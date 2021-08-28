@@ -6,6 +6,7 @@ class InstructionOpcode
 		mnemonic,
 		value,
 		operandsReadFromBitStream,
+		instructionWriteToBitStream,
 		description
 	)
 	{
@@ -13,6 +14,8 @@ class InstructionOpcode
 		this.value = value;
 		this._operandsReadFromBitStream =
 			operandsReadFromBitStream;
+		this.instructionWriteToBitStream =
+			instructionWriteToBitStream;
 		this.description = description || "";
 	}
 
@@ -24,6 +27,18 @@ class InstructionOpcode
 				new InstructionOpcode_Instances();
 		}
 		return InstructionOpcode._instances;
+	}
+
+	instructionWriteToBitStream(bitStream)
+	{
+		if (this._instructionWriteToBitStream == null)
+		{
+			throw("Not yet implemented!");
+		}
+		else
+		{
+			this._instructionWriteToBitStream(this, bitStream);
+		}
 	}
 
 	operandsReadFromBitStream(bitStream)
