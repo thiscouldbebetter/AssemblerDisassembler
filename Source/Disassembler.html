@@ -1,5 +1,5 @@
 <html>
-<body>
+<body onload="body_Loaded();">
 
 <div id="divUI">
 
@@ -9,18 +9,29 @@
 		Specify an x86 binary program file to load, then click the Disassemble
 		button to convert its bytes to assembly language.
 	</p>
+
+	<label>Instruction Set:</label>
+	<br />
+	<select id="selectInstructionSet"></select>
+	<br />
+
 	<label>Binary Program File to Load:</label>
+	<br />
 	<input type="file" onchange="inputFile_Changed(this);"></input>
 	<br />
 
-	<label>Program Bytes as Hexadecimal:</label><br />
+	<label>Program Bytes as Hexadecimal:</label>
+	<br />
 	<textarea id="textareaHexadecimal" cols="32" rows="8" spellcheck="false">
 89 c0
-	</textarea><br />
+	</textarea>
+	<br />
 
-	<button onclick="buttonDisassemble_Clicked()">Disassemble</button><br />
+	<button onclick="buttonDisassemble_Clicked()">Disassemble</button>
+	<br />
 
-	<label>Program as Assembly:</label><br />
+	<label>Program as Assembly:</label>
+	<br />
 	<textarea id="textareaAssembly" cols="16" rows="16" spellcheck="false">
 	</textarea>
 	<br />
@@ -31,7 +42,8 @@
 <script src="BitStream.js"></script>
 <script src="Instruction.js"></script>
 <script src="InstructionOpcode.js"></script>
-<script src="InstructionOpcode_Instances.js"></script>
+<script src="InstructionSet.js"></script>
+<script src="InstructionSet_x86.js"></script>
 <script src="Program.js"></script>
 <script src="Register.js"></script>
 
@@ -39,15 +51,40 @@
 
 // UI event handlers.
 
+function body_Loaded()
+{
+	var instructionSets = InstructionSet.Instances()._All;
+	var instructionSetNames =
+		instructionSets.map(x => x.name);
+
+	var d = document;
+	var selectInstructionSet =
+		d.getElementById("selectInstructionSet");
+
+	instructionSetNames.forEach
+	(
+		x =>
+		{
+			var xAsOption = d.createElement("option");
+			xAsOption.value = x;
+			xAsOption.innerHTML = x;
+			selectInstructionSet.appendChild(xAsOption);
+		}
+	);
+}
+
 function buttonDisassemble_Clicked()
 {
 	var d = document;
 
+	var selectInstructionSet =
+		d.getElementById("selectInstructionSet");
 	var textareaHexadecimal =
 		d.getElementById("textareaHexadecimal");
 	var textareaAssembly =
 		d.getElementById("textareaAssembly");
 
+	var instructionSetName = selectInstructionSet.value;
 	var fileContentsAsStringHexadecimal =
 		textareaHexadecimal.value;
 	var fileBytesAsStringsHexadecimal =
@@ -58,7 +95,7 @@ function buttonDisassemble_Clicked()
 			x => parseInt(x, 16)
 		);
 
-	var program = new Program("todo", fileBytes);
+	var program = new Program("todo", instructionSetName, fileBytes);
 
 	var programAsAssembly = program.toStringAssembly();
 

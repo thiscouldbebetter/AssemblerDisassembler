@@ -1,16 +1,21 @@
 
 class Program
 {
-	constructor(name, bytes)
+	constructor(name, instructionSetName, bytes)
 	{
 		this.name = name;
+		this.instructionSetName = instructionSetName;
 		this.bytes = bytes;
+	}
+
+	instructionSet()
+	{
+		return InstructionSet.byName(this.instructionSetName);
 	}
 
 	toStringAssembly()
 	{
-		var opcodesByValue = 
-			InstructionOpcode.Instances()._OpcodesByValue;
+		var instructionSet = this.instructionSet();
 
 		var bitStream = new BitStream(this.bytes);
 
@@ -22,7 +27,7 @@ class Program
 		{
 			var opcodeValue = bitStream.readByte();
 
-			var opcode = opcodesByValue.get(opcodeValue);
+			var opcode = instructionSet.opcodeByValue(opcodeValue);
 
 			if (opcode == null)
 			{
