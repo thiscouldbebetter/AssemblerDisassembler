@@ -9,7 +9,7 @@ class Instruction //
 
 	clone()
 	{
-		return new Instruction(this.opcode, this.operands.map(x => x));
+		return new Instruction(this.opcode, this.operands.map(x => x.clone()));
 	}
 
 	operandsReverse()

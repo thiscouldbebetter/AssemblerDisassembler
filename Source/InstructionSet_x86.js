@@ -366,9 +366,12 @@ class InstructionSet_x86
 		var mnemonicAndOperands =
 			assemblyCode.split(" ").map(x => x.split(",").join("")); 
 
-		var operand0 = mnemonicAndOperands[1];
-		var operand1 = mnemonicAndOperands[2];
-		var operands = [operand0, operand1].filter(x => x != null);
+		var operand0AsString = mnemonicAndOperands[1];
+		var operand1AsString = mnemonicAndOperands[2];
+		var operandsAsStrings = [operand0AsString, operand1AsString];
+		operandsAsStrings = operandsAsStrings.filter(x => x != null);
+
+		var operands = operandsAsStrings.map(x => Operand.fromString(x));
 
 		var mnemonic = mnemonicAndOperands[0];
 		var opcode =
@@ -443,14 +446,8 @@ class InstructionSet_x86
 		for (var i = 0; i < operands.length; i++)
 		{
 			var operand = operands[i];
-			if (operand.indexOf("[") >= 0)
-			{
-				returnValue += "rm";
-			}
-			else
-			{
-				returnValue += "r";
-			}
+			var operandType = operand.type();
+			returnValue += operandType.code;
 		}
 
 		if (returnValue.endsWith("rr"))
@@ -458,7 +455,7 @@ class InstructionSet_x86
 			returnValue = "rmr";
 		}
 
-		var operand0 = operands[0];
+		var operand0 = operands[0].value;
 
 		if (operand0 != null)
 		{
@@ -519,7 +516,9 @@ class InstructionSet_x86
 			x => x + (x.startsWith("[") ? "]" : "")
 		);
 
-		return operandsAsStrings;
+		var operands = operandsAsStrings.map(x => Operand.fromString(x));
+
+		return operands;
 	}
 
 	static operandsFromBitStream_rmr_b(stream)
@@ -562,7 +561,9 @@ class InstructionSet_x86
 			x => x + (x.startsWith("[") ? "]" : "")
 		);
 
-		return operandsAsStrings;
+		var operands = operandsAsStrings.map(x => Operand.fromString(x));
+
+		return operands;
 	}
 
 	static operandsFromBitStream_rmr_w(stream)
@@ -586,7 +587,8 @@ class InstructionSet_x86
 		for (var i = 0; i < operands.length; i++)
 		{
 			var operand = operands[i];
-			var register = Register.byName(operand);
+			var operandAsString = operand.toString();
+			var register = Register.byName(operandAsString);
 			stream.writeIntegerUsingBitWidth(register.code, operandWidthInBits);
 		}
 	}
@@ -605,7 +607,8 @@ class InstructionSet_x86
 		for (var i = 0; i < operands.length; i++)
 		{
 			var operand = operands[i];
-			var register = Register.byName(operand);
+			var operandAsString = operand.toString();
+			var register = Register.byName(operandAsString);
 			stream.writeIntegerUsingBitWidth(register.code, operandWidthInBits);
 		}
 	}
