@@ -4,12 +4,14 @@ class InstructionSet
 	constructor
 	(
 		name,
+		opcodeWidthInBits,
 		opcodes,
 		instructionFromAssemblyCode,
 		instructionReadFromBitStream
 	)
 	{
 		this.name = name;
+		this.opcodeWidthInBits = opcodeWidthInBits;
 		this.opcodes = opcodes;
 		this._instructionFromAssemblyCode = instructionFromAssemblyCode;
 		this._instructionReadFromBitStream = instructionReadFromBitStream;

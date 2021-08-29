@@ -1,5 +1,5 @@
 
-class InstructionOpcode
+class Opcode
 {
 	constructor
 	(
@@ -14,22 +14,22 @@ class InstructionOpcode
 		this.value = value;
 		this._operandsReadFromBitStream =
 			operandsReadFromBitStream;
-		this.instructionWriteToBitStream =
+		this._instructionWriteToBitStream =
 			instructionWriteToBitStream;
 		this.description = description || "";
 	}
 
 	static Instances()
 	{
-		if (InstructionOpcode._instances == null)
+		if (Opcode._instances == null)
 		{
-			InstructionOpcode._instances =
-				new InstructionOpcode_Instances();
+			Opcode._instances =
+				new Opcode_Instances();
 		}
-		return InstructionOpcode._instances;
+		return Opcode._instances;
 	}
 
-	instructionWriteToBitStream(bitStream)
+	instructionWriteToBitStream(instruction, bitStream)
 	{
 		if (this._instructionWriteToBitStream == null)
 		{
@@ -37,7 +37,7 @@ class InstructionOpcode
 		}
 		else
 		{
-			this._instructionWriteToBitStream(this, bitStream);
+			this._instructionWriteToBitStream(instruction, bitStream);
 		}
 	}
 

@@ -29,16 +29,12 @@ class AddressingMode_Instances
 {
 	constructor()
 	{
-		this.Default = new AddressingMode("Default", 0);
-
-		this.Memory = new AddressingMode("Memory", 0);
-		this.MemoryPlusOffset = new AddressingMode("MemoryPlusOffset", 2);
-		this.Register = new AddressingMode("Register", 1);
+		this.Memory = new AddressingMode("Memory", 0, "rm");
+		this.MemoryPlusOffset = new AddressingMode("MemoryPlusOffset", 2, "rm");
+		this.Register = new AddressingMode("Register", 1, "r");
 
 		this._All =
 		[
-			this.Default,
-
 			this.Memory,
 			this.MemoryPlusOffset,
 			this.Register

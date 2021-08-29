@@ -7,6 +7,17 @@ class Instruction //
 		this.operands = operands;
 	}
 
+	clone()
+	{
+		return new Instruction(this.opcode, this.operands.map(x => x));
+	}
+
+	operandsReverse()
+	{
+		this.operands = this.operands.reverse();
+		return this;
+	}
+
 	toString()
 	{
 		var opcodeAsString =
@@ -19,5 +30,15 @@ class Instruction //
 			opcodeAsString + " " + operandsAsString; 
 
 		return returnValue;
+	}
+
+	writeToBitStreamForInstructionSet(bitStream, instructionSet)
+	{
+		bitStream.writeIntegerUsingBitWidth
+		(
+			this.opcode.value,
+			instructionSet.opcodeWidthInBits
+		);
+		this.opcode.instructionWriteToBitStream(this, bitStream);
 	}
 }

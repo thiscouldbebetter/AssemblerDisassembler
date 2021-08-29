@@ -14,7 +14,13 @@ class Program
 			InstructionSet.byName(instructionSetName);
 
 		var newline = "\n";
-		var instructionsAsStrings = assemblyCode.split(newline);
+		var instructionsAsStrings = assemblyCode.split(newline).map
+		(
+			x => x.trim()
+		).filter
+		(
+			y => y.length > 0
+		);
 		var instructions = instructionsAsStrings.map
 		(
 			x => instructionSet.instructionFromAssemblyCode(x)
@@ -51,6 +57,25 @@ class Program
 	instructionSet()
 	{
 		return InstructionSet.byName(this.instructionSetName);
+	}
+
+	toBytes()
+	{
+		var bitStream = new BitStream();
+		var instructionSet = this.instructionSet();
+
+		for (var i = 0; i < this.instructions.length; i++)
+		{
+			var instruction = this.instructions[i];
+			instruction.writeToBitStreamForInstructionSet
+			(
+				bitStream, instructionSet
+			);
+		}
+
+		var returnBytes = bitStream.bytes;
+
+		return returnBytes;
 	}
 
 	toStringAssemblyCode()

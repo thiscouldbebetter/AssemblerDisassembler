@@ -23,6 +23,11 @@ class Register
 		return Register.Instances().byCodeAndWidthInBits(code, widthInBits);
 	}
 
+	static byName(registerName)
+	{
+		return Register.Instances().byName(registerName);
+	}
+
 	codeAndWidthInBitsAsString()
 	{
 		return this.code + "_" + this.widthInBits;
@@ -80,10 +85,29 @@ class Register_Instances
 				x => [x.codeAndWidthInBitsAsString(), x]
 			)
 		);
+
+		this._AllByName = new Map
+		(
+			this._All.map
+			(
+				x => [x.name, x]
+			)
+		);
+
 	}
 
 	byCodeAndWidthInBits(code, widthInBits)
 	{
 		return this._AllByCodeAndWidthInBits.get(code + "_" + widthInBits);
+	}
+
+	byName(name)
+	{
+		if (name.endsWith("]"))
+		{
+			name = name.split("]").join("");
+			name = name.split("+")[0];
+		}
+		return this._AllByName.get(name);
 	}
 }
