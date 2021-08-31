@@ -27,9 +27,16 @@ class OperandType
 
 		var operandTypeInstances = OperandType.Instances();
 
-		if (operandAsString.startsWith())
+		if (operandAsString.startsWith("["))
 		{
-			returnValue = operandTypeInstances.MemoryAtAddressInRegister;
+			if (operandAsString.indexOf("+") < 0)
+			{
+				returnValue = operandTypeInstances.MemoryAtAddressInRegister;
+			}
+			else
+			{
+				returnValue = operandTypeInstances.MemoryAtAddressInRegisterPlusOffset;
+			}
 		}
 		else
 		{
@@ -44,13 +51,18 @@ class OperandType_Instances
 {
 	constructor()
 	{
-		this.RegisterContents = new OperandType("RegisterContents", "r");
-		this.MemoryAtAddressInRegister = new OperandType("MemoryAtAddressInRegister", "rm");
+		this.RegisterContents =
+			new OperandType("RegisterContents", "r");
+		this.MemoryAtAddressInRegister =
+			new OperandType("MemoryAtAddressInRegister", "rm");
+		this.MemoryAtAddressInRegisterPlusOffset =
+			new OperandType("MemoryAtAddressInRegisterPlusOffset", "rm");
 
 		this._All =
 		[
 			this.RegisterContents,
-			this.MemoryAtAddressInRegister
+			this.MemoryAtAddressInRegister,
+			this.MemoryAtAddressInRegisterPlusOffset
 		];
 
 		this._AllByName = new Map(this._All.map(x => [x.name, x]));

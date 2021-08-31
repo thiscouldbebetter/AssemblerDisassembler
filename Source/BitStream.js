@@ -107,7 +107,7 @@ class BitStream
 		for (var i = 0; i < bitWidth; i++)
 		{
 			var placesToShift = bitWidth - 1 - i;
-			var bitToWrite = integerToWrite >> placesToShift;
+			var bitToWrite = (integerToWrite >> placesToShift) & 1;
 			this.writeBit(bitToWrite);
 		}
 	}

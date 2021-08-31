@@ -40,7 +40,7 @@ mov ax, ax
 
 	<label>Program Bytes as Hexadecimal:</label>
 	<br />
-	<textarea id="textareaHexadecimal" cols="32" rows="8" spellcheck="false">
+	<textarea id="textareaHexadecimal" cols="21" rows="8" spellcheck="false">
 89 c0
 	</textarea>
 	<br />
@@ -106,7 +106,7 @@ function buttonAssemble_Clicked()
 	
 	var programAsBytes = program.toBytes();
 	var programAsStringHexadecimal =
-		programAsBytes.map(x => x.toString(16)).join(" ");
+		programAsBytes.map(x => x.toString(16).padStart(2, "0")).join(" ");
 	
 	textareaHexadecimal.value = programAsStringHexadecimal;
 }

@@ -215,7 +215,7 @@ class InstructionSet_x86
 			new o("mov_rmrb", 	0x88, _r_rmr_b, 	null, 		"move r/m8 r8"),
 			new o("mov_rmrw", 	0x89, _r_rmr_w, 	_w_rmr_w, 	"move r/m16 r16"),
 			new o("mov_rrmb", 	0x8A, null, 		null, 		"move r8 r/m8"),
-			new o("mov_rrmw", 	0x8B, _r_rrm_w, 	null, 		"move r16 r/m16"),
+			new o("mov_rrmw", 	0x8B, _r_rrm_w, 	_w_rrm_w, 	"move r16 r/m16"),
 			new o("mov_rmwseg", 0x8C, _16, 			null, 		"move r/m16 Sreg"),
 			new o("mov_segrmw", 0x8E, null, 		null, 		"move Sreg r/m16"),
 			new o("mov_sb", 	0xA4, null, 		null, 		"move byte from string to string"),
@@ -577,12 +577,42 @@ class InstructionSet_x86
 
 	static operandsToBitStream_rmr_w(instruction, stream)
 	{
-		stream.writeIntegerUsingBitWidth
+		InstructionSet_x86.operandsToBitStream_rrm_w(instruction, stream, true);
+	}
+
+	static operandsToBitStream_rmr_w_old(instruction, stream)
+	{
+		var operands = instruction.operands.reverse(); // !
+
+		var operandTypes = OperandType.Instances();
+
+		var isEitherOperandTypeMemory = operands.some
 		(
-			3, 2 // todo - Is this the right addressing mode code?
+			x => x.operandTypeName == operandTypes.MemoryAtAddressInRegister.name
 		);
 
-		var operands = instruction.operands;
+		var isEitherOperandTypeMemoryPlusOffset = operands.some
+		(
+			x => x.operandTypeName == operandTypes.MemoryAtAddressInRegisterPlusOffset.name
+		);
+
+		var addressingModeCode = null;
+
+		if (isEitherOperandTypeMemory)
+		{
+			addressingModeCode = 0;
+		}
+		else if (isEitherOperandTypeMemoryPlusOffset)
+		{
+			addressingModeCode = 2;
+		}
+		else
+		{
+			addressingModeCode = 3;
+		}
+
+		stream.writeIntegerUsingBitWidth(addressingModeCode, 2);
+
 		var operandWidthInBits = 3;
 		for (var i = 0; i < operands.length; i++)
 		{
@@ -593,16 +623,57 @@ class InstructionSet_x86
 		}
 	}
 
-	static operandsToBitStream_rrm_w(instruction, stream)
+	static operandsToBitStream_rrm_w(instruction, stream, areOperandsReversed)
 	{
 		// todo - Consolidate with and differentiate from _rmr_ version.
 
-		stream.writeIntegerUsingBitWidth
+		var operands = instruction.operands;
+
+		if (areOperandsReversed)
+		{
+			operands = operands.map(x => x).reverse();
+		}
+
+		var operand0 = operands[0];
+		var operand1 = operands[1];
+
+		var operandTypes = OperandType.Instances();
+
+		var isEitherOperandTypeMemory = operands.some
 		(
-			3, 2 // todo - Is this the right addressing mode code?
+			x => x.operandTypeName == operandTypes.MemoryAtAddressInRegister.name
 		);
 
-		var operands = instruction.operands;
+		var isOperand0TypeMemoryPlusOffset =
+		(
+			operand0.operandTypeName == operandTypes.MemoryAtAddressInRegisterPlusOffset.name
+		);
+		var isOperand1TypeMemoryPlusOffset =
+		(
+			operand1.operandTypeName == operandTypes.MemoryAtAddressInRegisterPlusOffset.name
+		);
+
+		var addressingModeCode = null;
+
+		if (isEitherOperandTypeMemory)
+		{
+			addressingModeCode = 0;
+		}
+		else if (isOperand0TypeMemoryPlusOffset)
+		{
+			throw("Not implemented!");
+		}
+		else if (isOperand1TypeMemoryPlusOffset)
+		{
+			addressingModeCode = 1;
+		}
+		else
+		{
+			addressingModeCode = 3;
+		}
+
+		stream.writeIntegerUsingBitWidth(addressingModeCode, 2);
+
 		var operandWidthInBits = 3;
 		for (var i = 0; i < operands.length; i++)
 		{
@@ -610,6 +681,24 @@ class InstructionSet_x86
 			var operandAsString = operand.toString();
 			var register = Register.byName(operandAsString);
 			stream.writeIntegerUsingBitWidth(register.code, operandWidthInBits);
+		}
+
+		var isEitherOperandTypeMemoryPlusOffset = 
+		(
+			isOperand0TypeMemoryPlusOffset
+			|| isOperand1TypeMemoryPlusOffset
+		);
+
+		if (isEitherOperandTypeMemoryPlusOffset)
+		{
+			var operandIndex = 1;
+			var operand = operands[operandIndex];
+			var operandAsString = operand.toString();
+			var offset = parseInt
+			(
+				operandAsString.split("+")[1].split("]").join("")
+			);
+			stream.writeIntegerUsingBitWidth(offset, 8);
 		}
 	}
 
