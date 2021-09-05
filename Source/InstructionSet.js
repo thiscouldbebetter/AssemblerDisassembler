@@ -95,7 +95,7 @@ class InstructionSet_Instances
 	constructor()
 	{
 		
-		this.x86 = InstructionSet_x86.build();
+		this.x86 = InstructionSet_x86_16.build();
 
 		this._All =
 		[

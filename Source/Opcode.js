@@ -9,7 +9,7 @@ class Opcode
 
 	instructionWriteToBitStream(instructionSet, instruction, bitStream)
 	{
-		if (this.value == "data")
+		if (this.value == "data") // hack
 		{
 			var operand = instruction.operands[0];
 			bitStream.writeAlignOnBoundary(16);
