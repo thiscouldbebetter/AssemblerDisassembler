@@ -1,27 +1,15 @@
 
 class Operand
 {
-	constructor(operandTypeName, value)
+	constructor(operandType, value)
 	{
-		this.operandTypeName = operandTypeName;
+		this.operandType = operandType;
 		this.value = value;
-	}
-
-	static fromString(operandAsString)
-	{
-		var operandType =
-			OperandType.fromOperandAsString(operandAsString);
-
-		return new Operand
-		(
-			operandType.name,
-			operandAsString
-		);
 	}
 
 	clone()
 	{
-		return new Operand(this.operandTypeName, this.value);
+		return new Operand(this.operandType, this.value);
 	}
 
 	toString()
@@ -29,8 +17,14 @@ class Operand
 		return this.value;
 	}
 
-	type()
+	readFromBitStream(bitStream)
 	{
-		return OperandType.byName(this.operandTypeName);
+		throw("todo");
+	}
+
+	writeToBitStream(bitStream)
+	{
+		var type = this.operandType;
+		type.writeOperandValueToBitStream(this.value, bitStream);
 	}
 }

@@ -34,11 +34,6 @@ class Instruction //
 
 	writeToBitStreamForInstructionSet(bitStream, instructionSet)
 	{
-		bitStream.writeIntegerUsingBitWidth
-		(
-			this.opcode.value,
-			instructionSet.opcodeWidthInBits
-		);
-		this.opcode.instructionWriteToBitStream(this, bitStream);
+		this.opcode.instructionWriteToBitStream(instructionSet, this, bitStream);
 	}
 }

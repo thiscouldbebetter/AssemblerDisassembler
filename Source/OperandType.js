@@ -1,75 +1,29 @@
 
 class OperandType
 {
-	constructor(name, code)
+	constructor(role, size)
 	{
-		this.name = name;
-		this.code = code;
-	}
-
-	static Instances()
-	{
-		if (OperandType._instances == null)
-		{
-			OperandType._instances = new OperandType_Instances();
-		}
-		return OperandType._instances;
-	}
-
-	static byName(operandTypeName)
-	{
-		return OperandType.Instances().byName(operandTypeName);
+		this.role = role;
+		this.size = size;
 	}
 
 	static fromOperandAsString(operandAsString)
 	{
-		var returnValue = null;
+		var role = OperandRole.fromOperandAsString(operandAsString);
+		var size = OperandSize.fromOperandAsString(operandAsString);
 
-		var operandTypeInstances = OperandType.Instances();
+		var returnType = new OperandType(role, size);
 
-		if (operandAsString.startsWith("["))
-		{
-			if (operandAsString.indexOf("+") < 0)
-			{
-				returnValue = operandTypeInstances.MemoryAtAddressInRegister;
-			}
-			else
-			{
-				returnValue = operandTypeInstances.MemoryAtAddressInRegisterPlusOffset;
-			}
-		}
-		else
-		{
-			returnValue = operandTypeInstances.RegisterContents;
-		}
-
-		return returnValue;
-	}
-}
-
-class OperandType_Instances
-{
-	constructor()
-	{
-		this.RegisterContents =
-			new OperandType("RegisterContents", "r");
-		this.MemoryAtAddressInRegister =
-			new OperandType("MemoryAtAddressInRegister", "rm");
-		this.MemoryAtAddressInRegisterPlusOffset =
-			new OperandType("MemoryAtAddressInRegisterPlusOffset", "rm");
-
-		this._All =
-		[
-			this.RegisterContents,
-			this.MemoryAtAddressInRegister,
-			this.MemoryAtAddressInRegisterPlusOffset
-		];
-
-		this._AllByName = new Map(this._All.map(x => [x.name, x]));
+		return returnType;
 	}
 
-	byName(operandTypeName)
+	writeToBitStream(bitStream)
 	{
-		return this._AllByName.get(operandTypeName);
+		this.role.writeToBitStream(bitStream);
+	}
+
+	writeOperandValueToBitStream(operandValue, bitStream)
+	{
+		this.size.writeOperandValueToBitStream(operandValue, bitStream);
 	}
 }

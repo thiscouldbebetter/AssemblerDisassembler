@@ -111,4 +111,18 @@ class BitStream
 			this.writeBit(bitToWrite);
 		}
 	}
+
+	writeByte(byteToWrite)
+	{
+		this.writeIntegerUsingBitWidth(byteToWrite, 8);
+	}
+
+	writeString(stringToWrite)
+	{
+		for (var i = 0; i < stringToWrite.length; i++)
+		{
+			var charToWrite = stringToWrite.charCodeAt(i);
+			this.writeByte(charToWrite);
+		}
+	}
 }

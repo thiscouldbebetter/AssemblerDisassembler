@@ -29,7 +29,8 @@ class InstructionSet_x86
 
 		// More complex operand parsing.
 
-		// Operand types codes used as mnemonic suffixes:
+		/*
+		// Operand Roles codes used as mnemonic suffixes:
 		// ----------------------------------------------
 		// r = register
 		// rm = register/memory
@@ -40,8 +41,6 @@ class InstructionSet_x86
 
 		// a = al register assumed
 
-		// Reads.
-
 		var _r_rmr_b = InstructionSet_x86.operandsFromBitStream_rmr_b;
 		var _r_rmr_w = InstructionSet_x86.operandsFromBitStream_rmr_w;
 		var _r_rrm_b = InstructionSet_x86.operandsFromBitStream_rrm_b;
@@ -49,9 +48,15 @@ class InstructionSet_x86
 
 		var _w_rmr_w = InstructionSet_x86.operandsToBitStream_rmr_w;
 		var _w_rrm_w = InstructionSet_x86.operandsToBitStream_rrm_w;
+		*/
 
-		var opcodes	=
+		var opcodeValueFromOperands_Mov = InstructionSet_x86.opcodeValueFromOperands_Mov;
+		var operandsRead_Mov = InstructionSet_x86.operandsReadFromBitStream_Mov;
+		var operandsWrite_Mov = InstructionSet_x86.instructionOperandsWriteToBitStream_Mov;
+
+		var opcodeGroups =
 		[
+			/*
 			//                         Operands
 			//                         ------------------
 			//     Mnemonic 	Code   Read         Write Description
@@ -62,27 +67,27 @@ class InstructionSet_x86
 			new o("aas", 		0x3F, _0,			null, "ascii adjust al after sub"), // opds: Radix.
 
 			// Add with carry.
-			new o("adc_rmrb", 	0x10, _r_rmr_b, 	null, "add with carry r/m8 r8"),
-			new o("adc_rrw", 	0x11, _r_rrm_w, 	null, "add with carry r/m16 r16"), 
-			new o("adc_rrmb", 	0x12, _r_rrm_b, 	null, "add with carry r8 r/m8"),
-			new o("adc_rrmw", 	0x13, _r_rrm_w, 	null, "add with carry r16 r/m16"),
-			new o("adc_aib", 	0x14, _8, 			null, "add with carry al imm8"),
-			new o("adc_aiw", 	0x15, _16, 			null, "add with carry eax imm16"),
+			new o("adc_rmrb", 	0x10, null, 	null, "add with carry r/m8 r8"),
+			new o("adc_rrw", 	0x11, null, 	null, "add with carry r/m16 r16"), 
+			new o("adc_rrmb", 	0x12, null, 	null, "add with carry r8 r/m8"),
+			new o("adc_rrmw", 	0x13, null, 	null, "add with carry r16 r/m16"),
+			new o("adc_aib", 	0x14, _8, 		null, "add with carry al imm8"),
+			new o("adc_aiw", 	0x15, _16, 		null, "add with carry eax imm16"),
 
 			// adds
-			new o("add_rmrb", 	0x00, _r_rmr_b, 	null, "add r/m8 r8"),
-			new o("add_rrw", 	0x01, _r_rrm_w, 	null, "add r/m16 r16"),
-			new o("add_rrmb", 	0x02, _r_rrm_b, 	null, "add r8 r/m8"),
-			new o("add_rrmw", 	0x03, _r_rrm_w, 	null, "add r16 r/m16"),
-			new o("add_aib", 	0x04, _8, 			null, "add al imm8"),
-			new o("add_aiw", 	0x05, _16, 			null, "add eax imm16"),
+			new o("add_rmrb", 	0x00, null, 	null, "add r/m8 r8"),
+			new o("add_rrw", 	0x01, null, 	null, "add r/m16 r16"),
+			new o("add_rrmb", 	0x02, null, 	null, "add r8 r/m8"),
+			new o("add_rrmw", 	0x03, null, 	null, "add r16 r/m16"),
+			new o("add_aib", 	0x04, _8, 		null, "add al imm8"),
+			new o("add_aiw", 	0x05, _16, 		null, "add eax imm16"),
 
-			new o("and_rmrb", 	0x20, _r_rmr_b, 	null, "and r/m8 r8"),
-			new o("and_rmrw", 	0x21, _r_rmr_w, 	null, "and r/m16 r16"),
-			new o("and_rrmb", 	0x22, _r_rrm_b, 	null, "and r8 r/m8"),
-			new o("and_rrmw", 	0x23, _r_rrm_w, 	null, "and r16 r/m16"),
-			new o("and_aib", 	0x24, _8, 			null, "and al imm8"),
-			new o("and_aiw", 	0x25, _16, 			null, "and eax imm16"),
+			new o("and_rmrb", 	0x20, null, 	null, "and r/m8 r8"),
+			new o("and_rmrw", 	0x21, null, 	null, "and r/m16 r16"),
+			new o("and_rrmb", 	0x22, null, 	null, "and r8 r/m8"),
+			new o("and_rrmw", 	0x23, null, 	null, "and r16 r/m16"),
+			new o("and_aib", 	0x24, _8, 		null, "and al imm8"),
+			new o("and_aiw", 	0x25, _16, 		null, "and eax imm16"),
 
 			new o("arith0", 	0x80, null, 		null, "add,or,adc,sbb,and,sub,xor,cmp r/m8 imm8"),
 			new o("arith1", 	0x81, null, 		null, "add,or,adc,sbb,and,sub,xor,cmp r/m16 imm16"),
@@ -211,31 +216,43 @@ class InstructionSet_x86
 			new o("loopz", 		0xE2, null, 		null, "dec cx, jump if >0"),
 			new o("jcxz", 		0xE3, null, 		null, "jump if cx 0"),
 
+			*/
+
 			// moves
-			new o("mov_rmrb", 	0x88, _r_rmr_b, 	null, 		"move r/m8 r8"),
-			new o("mov_rmrw", 	0x89, _r_rmr_w, 	_w_rmr_w, 	"move r/m16 r16"),
-			new o("mov_rrmb", 	0x8A, null, 		null, 		"move r8 r/m8"),
-			new o("mov_rrmw", 	0x8B, _r_rrm_w, 	_w_rrm_w, 	"move r16 r/m16"),
-			new o("mov_rmwseg", 0x8C, _16, 			null, 		"move r/m16 Sreg"),
-			new o("mov_segrmw", 0x8E, null, 		null, 		"move Sreg r/m16"),
-			new o("mov_sb", 	0xA4, null, 		null, 		"move byte from string to string"),
-			new o("mov_sw", 	0xA5, null, 		null, 		"move word from string to string"),
-			new o("mov_r0i8", 	0xB0, null, 		null, 		"move r0 (ax?) imm8"),
-			new o("mov_r1i8", 	0xB1, null, 		null, 		"move r1 imm8"),
-			new o("mov_r2i8", 	0xB2, null, 		null, 		"move r2 imm8"),
-			new o("mov_r3i8", 	0xB3, null, 		null, 		"move r3 imm8"),
-			new o("mov_r4i8", 	0xB4, null, 		null, 		"move r4 imm8"),
-			new o("mov_r5i8", 	0xB5, null, 		null, 		"move r5 imm8"),
-			new o("mov_r6i8", 	0xB6, null, 		null, 		"move r6 imm8"),
-			new o("mov_r7i8", 	0xB7, null, 		null, 		"move r7 imm8"),
-			new o("mov_16r0", 	0xB8, null, 		null, 		"move r0 (ax?) imm16"),
-			new o("mov_r1iw", 	0xB9, null, 		null, 		"move r1 imm16"),
-			new o("mov_r2iw", 	0xBA, null, 		null, 		"move r2 imm16"),
-			new o("mov_r3iw", 	0xBB, null, 		null, 		"move r3 imm16"),
-			new o("mov_r4iw", 	0xBC, null, 		null, 		"move r4 imm16"),
-			new o("mov_r5iw", 	0xBD, null, 		null, 		"move r5 imm16"),
-			new o("mov_r6iw", 	0xBE, null, 		null, 		"move r6 imm16"),
-			new o("mov_r7iw", 	0xBF, null, 		null, 		"move r7 imm16"),
+			new OpcodeGroup
+			(
+				"mov",
+				opcodeValueFromOperands_Mov,
+				operandsRead_Mov,
+				operandsWrite_Mov,
+				[
+					new o(0x88, "move r/m8 r8"),
+					new o(0x89, "move r/m16 r16"),
+					new o(0x8A, "move r8 r/m8"),
+					new o(0x8B, "move r16 r/m16"),
+					new o(0xB8, "move ax imm8"),
+				]
+			),
+			/*
+			new o("", 	0x8C, movRead, movWrite, 	"move r/m16 Sreg"),
+			new o("", 	0x8E, movRead, movWrite, 	"move Sreg r/m16"),
+			new o("mov", sb" ], 		0xA4, movRead, movWrite, 	"move byte from string to string"),
+			new o("mov", sw" ], 		0xA5, movRead, movWrite, 	"move word from string to string"),
+			new o("mov", r1i8" ], 	0xB1, movRead, movWrite, 	"move r1 imm8"),
+			new o("mov", r2i8" ], 	0xB2, movRead, movWrite, 	"move r2 imm8"),
+			new o("mov", r3i8" ], 	0xB3, movRead, movWrite, 	"move r3 imm8"),
+			new o("mov", r4i8" ], 	0xB4, movRead, movWrite, 	"move r4 imm8"),
+			new o("mov", r5i8" ], 	0xB5, movRead, movWrite, 	"move r5 imm8"),
+			new o("mov", r6i8" ], 	0xB6, movRead, movWrite, 	"move r6 imm8"),
+			new o("mov", r7i8" ], 	0xB7, movRead, movWrite, 	"move r7 imm8"),
+			new o("mov", 16r0" ], 	0xB8, movRead, movWrite, 	"move r0 (ax?) imm16"),
+			new o("mov", r1iw" ], 	0xB9, movRead, movWrite, 	"move r1 imm16"),
+			new o("mov", r2iw" ], 	0xBA, movRead, movWrite, 	"move r2 imm16"),
+			new o("mov", r3iw" ], 	0xBB, movRead, movWrite, 	"move r3 imm16"),
+			new o("mov", r4iw" ], 	0xBC, movRead, movWrite, 	"move r4 imm16"),
+			new o("mov", r5iw" ], 	0xBD, movRead, movWrite, 	"move r5 imm16"),
+			new o("mov", r6iw" ], 	0xBE, movRead, movWrite, 	"move r6 imm16"),
+			new o("mov", r7iw" ], 	0xBF, movRead, movWrite, 	"move r7 imm16"),
 
 			//new o("mul", ?, null, "unsigned multiply"),
 			//new o("neg", ?, null, "two's complement negation),
@@ -341,13 +358,14 @@ class InstructionSet_x86
 			new o("xor3", 		0x33, null, 		null, "xor r16 r/m16"),
 			new o("xor4", 		0x34, null, 		null, "xor al imm8"),
 			new o("xor5", 		0x35, null, 		null, "xor eax imm16")
+			*/
 		];
 
 		var instructionSet = new InstructionSet
 		(
 			"x86",
 			8, // opcodeWidthInBits
-			opcodes,
+			opcodeGroups,
 			InstructionSet_x86.instructionFromAssemblyCode,
 			InstructionSet_x86.instructionReadFromBitStream
 		);
@@ -366,29 +384,63 @@ class InstructionSet_x86
 		var mnemonicAndOperands =
 			assemblyCode.split(" ").map(x => x.split(",").join("")); 
 
-		var operand0AsString = mnemonicAndOperands[1];
-		var operand1AsString = mnemonicAndOperands[2];
-		var operandsAsStrings = [operand0AsString, operand1AsString];
-		operandsAsStrings = operandsAsStrings.filter(x => x != null);
-
-		var operands = operandsAsStrings.map(x => Operand.fromString(x));
-
 		var mnemonic = mnemonicAndOperands[0];
-		var opcode =
-			InstructionSet_x86.instructionFromAssemblyCode_OpcodeFromMnemonicAndOperands
+
+		var opcode = null;
+		var operands = null;
+
+		if (mnemonic == "db" || mnemonic == "dw")
+		{
+			opcode = new Opcode("data");
+			var dataToWriteAsString = "";
+
+			var operandsAsString = assemblyCode.substr(mnemonic.length + 1);
+			var operandsAsStrings = operandsAsString.split(","); // todo - Commas in quotes.
+
+			for (var i = 0; i < operandsAsStrings.length; i++)
+			{
+				var operand = operandsAsStrings[i];
+				var operandIsQuotedString = operand.startsWith("'");
+				if (operandIsQuotedString)
+				{
+					operand = operand.split("'").join("");
+					dataToWriteAsString += operand;
+				}
+				else
+				{
+					var operandAsInteger = parseInt(operand);
+					var operandAsCharacter = String.fromCharCode(operandAsInteger);
+					dataToWriteAsString += operandAsCharacter;
+				}
+			}
+			var operandRole = OperandRole.Instances().Data;
+			var operandSize = new OperandSize("data", dataToWriteAsString.length);
+			var operandType = new OperandType(operandRole, operandSize);
+			var operand = new Operand(operandType, dataToWriteAsString);
+			operands = [ operand ];
+		}
+		else
+		{
+			var operandsAsStrings = mnemonicAndOperands.slice(1);
+			operandsAsStrings = operandsAsStrings.filter(x => x != null);
+
+			operands = operandsAsStrings.map
 			(
-				instructionSet, mnemonic, operands
+				x => InstructionSet_x86.operandFromString(x)
 			);
+
+			var opcodeGroup =
+				instructionSet.opcodeGroupByMnemonic(mnemonic);
+
+			var opcode = opcodeGroup.opcodeFromOperands(operands);
+		}
 
 		var instruction = new Instruction(opcode, operands);
 
 		return instruction;
 	}
 
-	static instructionFromAssemblyCode_OpcodeFromMnemonicAndOperands
-	(
-		instructionSet, mnemonic, operands
-	)
+	static opcodeValueFromOperands_Mov(operands)
 	{
 		// The same mnemonic may be used for multiple opcodes,
 		// usually distinguished by the addressing mode of the operands.
@@ -401,16 +453,84 @@ class InstructionSet_x86
 		// "mov ax, bx", "mov ax, [bx]", and "mov ax, [bx+2]"
 		// each correspond to a different opcode.
 
-		var mnemonicSuffix =
-			InstructionSet_x86.mnemonicSuffixForOperands(operands);
-		var mnemonicPlusAddressingMode =
-			mnemonic + "_" + mnemonicSuffix;
-		var opcode = instructionSet.opcodeByMnemonic
-		(
-			mnemonicPlusAddressingMode
-		);
+		var opcodeValue = null;
 
-		return opcode;
+		var operand0 = operands[0];
+		var operand1 = operands[1];
+
+		var operand0Type = operand0.operandType;
+		var operand0RoleName = operand0Type.role.name;
+		var operand0SizeInBits = operand0Type.size.sizeInBits;
+
+		var operand1Type = operand1.operandType;
+		var operand1RoleName = operand1Type.role.name;
+		var operand1SizeInBits = operand1Type.size.sizeInBits;
+
+		var operandRolesAll = OperandRole.Instances();
+
+		if (operand0RoleName == operandRolesAll.Immediate.name)
+		{
+			throw("Unexpected operand role!");
+		}
+		else if (operand0RoleName == operandRolesAll.RegisterContents.name)
+		{
+			if (operand1RoleName == operandRolesAll.Immediate.name)
+			{
+				opcodeValue = 0xB8;
+			}
+			else if (operand1RoleName == operandRolesAll.RegisterContents.name)
+			{
+				opcodeValue = (operand0SizeInBits == 8 ? 0x88 : 0x89);
+			}
+			else if (operand1RoleName == operandRolesAll.MemoryAtAddressInRegister.name)
+			{
+				opcodeValue = (operand0SizeInBits == 8 ? 0x8A : 0x8B);
+			}
+			else if (operand1RoleName == operandRolesAll.MemoryAtAddressInRegisterPlusOffset.name)
+			{
+				opcodeValue = (operand0SizeInBits == 8 ? 0x8A : 0x8B);
+			}
+		}
+		else if (operand0RoleName == operandRolesAll.MemoryAtAddressInRegister.name)
+		{
+			if (operand1RoleName == operandRolesAll.Immediate.Name)
+			{
+				throw("Not yet implemented!");
+			}
+			else if (operand1RoleName == operandRolesAll.RegisterContents.name)
+			{
+				opcodeValue = (operand0SizeInBits == 8 ? 0x88 : 0x89);
+			}
+			else if (operand1RoleName == operandRolesAll.MemoryAtAddressInRegister.name)
+			{
+				throw("Not yet implemented!");
+			}
+			else if (operand1RoleName == operandRolesAll.MemoryAtAddressInRegisterPlusOffset.name)
+			{
+				throw("Not yet implemented!");
+			}
+		}
+		else if (operand0RoleName == operandRolesAll.MemoryAtAddressInRegisterPlusOffset.name)
+		{
+			if (operand1RoleName == operandRolesAll.Immediate.Name)
+			{
+				throw("Not yet implemented!");
+			}
+			else if (operand1RoleName == operandRolesAll.RegisterContents.name)
+			{
+				opcodeValue = (operand0SizeInBits == 8 ? 0x88 : 0x89);
+			}
+			else if (operand1RoleName == operandRolesAll.MemoryAtAddressInRegister.name)
+			{
+				throw("Not yet implemented!");
+			}
+			else if (operand1RoleName == operandRolesAll.MemoryAtAddressInRegisterPlusOffset.name)
+			{
+				throw("Not yet implemented!");
+			}
+		}
+
+		return opcodeValue;
 	}
 
 	static instructionReadFromBitStream(instructionSet, bitStream)
@@ -439,46 +559,211 @@ class InstructionSet_x86
 		return instruction;
 	}
 
-	static mnemonicSuffixForOperands(operands)
+	static operandFromString(operandAsString)
 	{
-		var returnValue = "";
+		var registerValuesByName = new Map
+		([
+			[ "ax", 0 ],
+			[ "bx", 3 ],
+			[ "cx", 1 ],
+			[ "dx", 2 ]
+		]);
 
-		for (var i = 0; i < operands.length; i++)
+		var operandRoles = OperandRole.Instances();
+		var operandSizes = OperandSize.Instances();
+
+		operandAsString = operandAsString.split(" ").join("");
+
+		var operandRole = null;
+		var operandSize = operandSizes.ThreeBits;
+		var operandValue = null;
+
+		var operandAsInteger = parseInt(operandAsString);
+
+		if (isNaN(operandAsInteger) == false)
 		{
-			var operand = operands[i];
-			var operandType = operand.type();
-			returnValue += operandType.code;
+			operandRole = operandRoles.Immediate;
+			operandSize = operandSizes.Byte;
+			operandValue = operandAsInteger;
 		}
-
-		if (returnValue.endsWith("rr"))
+		else if (operandAsString.startsWith("["))
 		{
-			returnValue = "rmr";
-		}
-
-		var operand0 = operands[0].value;
-
-		if (operand0 != null)
-		{
-			if (operand0.indexOf("x") >= 0)
+			var registerName = operandAsString.substr(1, 2);
+			if (registerName == "bx")
 			{
-				// 16-bit register.
-				returnValue += "w"; // "w" = "word"
-			}
-			else if (operand0.indexOf("e") >= 0)
-			{
-				// 32-bit register.
-				returnValue += "dw"; // "dw" = "double word".
+				operandValue = 7;
 			}
 			else
 			{
-				// 8-bit register.
-				returnValue += "b"; // "b" = "byte".
+				throw("todo");
+			}
+
+			var indexOfPlusSign = operandAsString.indexOf("+");
+			if (indexOfPlusSign >= 0)
+			{
+				operandRole = operandRoles.MemoryAtAddressInRegisterPlusOffset;
+				var offsetAsString =
+					operandAsString.substr(indexOfPlusSign + 1).split("]").join("");
+				var offset = parseInt(offsetAsString);
+				var offsetSizeInBits = 8;
+				operandSize = operandSizes.ElevenBits;
+				operandValue = (operandValue << offsetSizeInBits) + offset;
+			}
+			else
+			{
+				operandRole = operandRoles.MemoryAtAddressInRegister;
+			}
+		}
+		else if (operandAsString.length == 2)
+		{
+			operandRole = operandRoles.RegisterContents;
+
+			var registerName = operandAsString;
+			operandValue = registerValuesByName.get(registerName);
+		}
+
+		if (operandValue == null)
+		{
+			throw("Unrecognized operand: " + operandAsString);
+		}
+
+		var operandType = new OperandType(operandRole, operandSize);
+		var returnOperand = new Operand(operandType, operandValue);
+
+		return returnOperand;
+	}
+
+	static operandsReadFromBitStream_Mov(operands, bitStream)
+	{
+		throw("todo");
+	}
+
+	static instructionOperandsWriteToBitStream_Mov(instruction, bitStream)
+	{
+		var operands = instruction.operands;
+
+		var operandRoles = operands.map(x => x.operandType.role);
+		var operand0Role = operandRoles[0];
+		var operand1Role = operandRoles[1];
+
+		var operandRolesAll = OperandRole.Instances();
+
+		var operandRolesCodeToWrite = null;
+
+		if (operand0Role == operandRolesAll.RegisterContents)
+		{
+			if (operand1Role == operandRolesAll.Immediate)
+			{
+				operandRolesCodeToWrite = null;
+			}
+			else if (operand1Role == operandRolesAll.RegisterContents)
+			{
+				operandRolesCodeToWrite = 3;
+			}
+			else if (operand1Role == operandRolesAll.MemoryAtAddressInRegister)
+			{
+				operandRolesCodeToWrite = 0;
+			}
+			else if (operand1Role == operandRolesAll.MemoryAtAddressInRegisterPlusOffset)
+			{
+				operandRolesCodeToWrite = 1;
+			}
+		}
+		else if (operand0Role == operandRolesAll.MemoryAtAddressInRegister)
+		{
+			if (operand1Role == operandRolesAll.RegisterContents)
+			{
+				operandRolesCodeToWrite = 0;
+			}
+			else if (operand1Role == operandRolesAll.MemoryAtAddressInRegister)
+			{
+				throw("todo");
+			}
+			else if (operand1Role == operandRolesAll.MemoryAtAddressInRegisterPlusOffset)
+			{
+				throw("todo");
+			}
+		}
+		else if (operand0Role == operandRolesAll.MemoryAtAddressInRegisterPlusOffset)
+		{
+			if (operand1Role == operandRolesAll.RegisterContents)
+			{
+				operandRolesCodeToWrite = 1;
+			}
+			else if (operand1Role == operandRolesAll.MemoryAtAddressInRegister)
+			{
+				throw("todo");
+			}
+			else if (operand1Role == operandRolesAll.MemoryAtAddressInRegisterPlusOffset)
+			{
+				throw("todo");
 			}
 		}
 
-		return returnValue;
+		if (operandRolesCodeToWrite == null)
+		{
+			// Do nothing.
+		}
+		else
+		{
+			bitStream.writeIntegerUsingBitWidth(operandRolesCodeToWrite, 2);
+		}
+
+		// Depending on opcode, operands may be written
+		// in the reverse of the order
+		// that they appear in the assembly code.
+
+		var opcode = instruction.opcode;
+		var reverseOperandsFlag = (opcode.value >> 1) & 1;
+		var areOperandsReversed = (reverseOperandsFlag == 1);
+		if (areOperandsReversed)
+		{
+			operands = operands.slice().reverse();
+		}
+
+		for (var i = operands.length - 1; i >= 0; i--)
+		{
+			var operand = operands[i];
+			operand.writeToBitStream(bitStream);
+		}
 	}
 
+	/*
+	static opodeFromOperands_Mov(operands)
+	{
+		var returnValue = "";
+
+		var operandRoles = operands.map(x => x.Role);
+		var operandRoleCodes = operandRoles.map(x => x.code);
+		var operandRoleCodesJoined = operandRoleCodes.join("");
+
+		var operandWidthCode;
+
+		var operand0Value = operands[0].value;
+
+		if (operand0Value != null)
+		{
+			if (operand0Value.indexOf("x") >= 0)
+			{
+				// 16-bit register.
+				operandWidthCode = "w"; // "w" = "word"
+			}
+			else if (operand0Value.indexOf("e") >= 0)
+			{
+				// 32-bit register.
+				operandWidthCode += "dw"; // "dw" = "double word".
+			}
+			else if (operand0Value.indexOf("h") >= 0 || operand0Value.indexOf("l") >= 0)
+			{
+				// 8-bit register.
+				operandWidthCode += "b"; // "b" = "byte".
+			}
+		}
+
+		returnValue = operandRoleCodesJoined + operandWidthCode;
+
+		return returnValue;
+	}
 
 	// Read operands from BitStream.
 
@@ -584,25 +869,25 @@ class InstructionSet_x86
 	{
 		var operands = instruction.operands.reverse(); // !
 
-		var operandTypes = OperandType.Instances();
+		var operandRoles = OperandRole.Instances();
 
-		var isEitherOperandTypeMemory = operands.some
+		var isEitherOperandRoleMemory = operands.some
 		(
-			x => x.operandTypeName == operandTypes.MemoryAtAddressInRegister.name
+			x => x.operandRoleName == operandRoles.MemoryAtAddressInRegister.name
 		);
 
-		var isEitherOperandTypeMemoryPlusOffset = operands.some
+		var isEitherOperandRoleMemoryPlusOffset = operands.some
 		(
-			x => x.operandTypeName == operandTypes.MemoryAtAddressInRegisterPlusOffset.name
+			x => x.operandRoleName == operandRoles.MemoryAtAddressInRegisterPlusOffset.name
 		);
 
 		var addressingModeCode = null;
 
-		if (isEitherOperandTypeMemory)
+		if (isEitherOperandRoleMemory)
 		{
 			addressingModeCode = 0;
 		}
-		else if (isEitherOperandTypeMemoryPlusOffset)
+		else if (isEitherOperandRoleMemoryPlusOffset)
 		{
 			addressingModeCode = 2;
 		}
@@ -637,33 +922,33 @@ class InstructionSet_x86
 		var operand0 = operands[0];
 		var operand1 = operands[1];
 
-		var operandTypes = OperandType.Instances();
+		var operandRoles = OperandRole.Instances();
 
-		var isEitherOperandTypeMemory = operands.some
+		var isEitherOperandRoleMemory = operands.some
 		(
-			x => x.operandTypeName == operandTypes.MemoryAtAddressInRegister.name
+			x => x.operandRoleName == operandRoles.MemoryAtAddressInRegister.name
 		);
 
-		var isOperand0TypeMemoryPlusOffset =
+		var isOperand0RoleMemoryPlusOffset =
 		(
-			operand0.operandTypeName == operandTypes.MemoryAtAddressInRegisterPlusOffset.name
+			operand0.operandRoleName == operandRoles.MemoryAtAddressInRegisterPlusOffset.name
 		);
-		var isOperand1TypeMemoryPlusOffset =
+		var isOperand1RoleMemoryPlusOffset =
 		(
-			operand1.operandTypeName == operandTypes.MemoryAtAddressInRegisterPlusOffset.name
+			operand1.operandRoleName == operandRoles.MemoryAtAddressInRegisterPlusOffset.name
 		);
 
 		var addressingModeCode = null;
 
-		if (isEitherOperandTypeMemory)
+		if (isEitherOperandRoleMemory)
 		{
 			addressingModeCode = 0;
 		}
-		else if (isOperand0TypeMemoryPlusOffset)
+		else if (isOperand0RoleMemoryPlusOffset)
 		{
 			throw("Not implemented!");
 		}
-		else if (isOperand1TypeMemoryPlusOffset)
+		else if (isOperand1RoleMemoryPlusOffset)
 		{
 			addressingModeCode = 1;
 		}
@@ -679,17 +964,26 @@ class InstructionSet_x86
 		{
 			var operand = operands[i];
 			var operandAsString = operand.toString();
-			var register = Register.byName(operandAsString);
-			stream.writeIntegerUsingBitWidth(register.code, operandWidthInBits);
+
+			if (isNaN(operandAsString))
+			{
+				var register = Register.byName(operandAsString);
+				stream.writeIntegerUsingBitWidth(register.code, operandWidthInBits);
+			}
+			else
+			{
+				var operandAsInt = parseInt(operandAsString);
+				stream.writeIntegerUsingBitWidth(operandAsInt, operandWidthInBits)
+			}
 		}
 
-		var isEitherOperandTypeMemoryPlusOffset = 
+		var isEitherOperandRoleMemoryPlusOffset = 
 		(
-			isOperand0TypeMemoryPlusOffset
-			|| isOperand1TypeMemoryPlusOffset
+			isOperand0RoleMemoryPlusOffset
+			|| isOperand1RoleMemoryPlusOffset
 		);
 
-		if (isEitherOperandTypeMemoryPlusOffset)
+		if (isEitherOperandRoleMemoryPlusOffset)
 		{
 			var operandIndex = 1;
 			var operand = operands[operandIndex];
@@ -701,5 +995,6 @@ class InstructionSet_x86
 			stream.writeIntegerUsingBitWidth(offset, 8);
 		}
 	}
+	*/
 
 }

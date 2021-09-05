@@ -1,64 +1,30 @@
 
 class Opcode
 {
-	constructor
-	(
-		mnemonic,
-		value,
-		operandsReadFromBitStream,
-		instructionWriteToBitStream,
-		description
-	)
+	constructor(value, description)
 	{
-		this.mnemonic = mnemonic;
 		this.value = value;
-		this._operandsReadFromBitStream =
-			operandsReadFromBitStream;
-		this._instructionWriteToBitStream =
-			instructionWriteToBitStream;
 		this.description = description || "";
 	}
 
-	static Instances()
+	instructionWriteToBitStream(instructionSet, instruction, bitStream)
 	{
-		if (Opcode._instances == null)
+		if (this.value == "data")
 		{
-			Opcode._instances =
-				new Opcode_Instances();
-		}
-		return Opcode._instances;
-	}
-
-	instructionWriteToBitStream(instruction, bitStream)
-	{
-		if (this._instructionWriteToBitStream == null)
-		{
-			throw("Not yet implemented!");
+			var operand = instruction.operands[0];
+			bitStream.writeString(operand.value);
 		}
 		else
 		{
-			this._instructionWriteToBitStream(instruction, bitStream);
+			bitStream.writeIntegerUsingBitWidth
+			(
+				this.value,
+				instructionSet.opcodeWidthInBits
+			);
+			this.group.instructionOperandsWriteToBitStream
+			(
+				instruction, bitStream
+			);
 		}
-	}
-
-	operandsReadFromBitStream(bitStream)
-	{
-		var operands = null;
-
-		if (this._operandsReadFromBitStream == null)
-		{
-			throw("Not yet implemented!");
-		}
-		else
-		{
-			operands = this._operandsReadFromBitStream(bitStream);
-		}
-
-		return operands;
-	}
-
-	toString()
-	{
-		return this.mnemonic.split("_")[0];
 	}
 }

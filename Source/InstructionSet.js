@@ -5,26 +5,30 @@ class InstructionSet
 	(
 		name,
 		opcodeWidthInBits,
-		opcodes,
+		opcodeGroups,
 		instructionFromAssemblyCode,
 		instructionReadFromBitStream
 	)
 	{
 		this.name = name;
 		this.opcodeWidthInBits = opcodeWidthInBits;
-		this.opcodes = opcodes;
+		this.opcodeGroups = opcodeGroups;
 		this._instructionFromAssemblyCode = instructionFromAssemblyCode;
 		this._instructionReadFromBitStream = instructionReadFromBitStream;
 
-		this._opcodesByMnemonic = new Map
+		this._opcodeGroupsByMnemonic = new Map
 		(
-			this.opcodes.map(x => [x.mnemonic, x])
+			this.opcodeGroups.map(x => [x.mnemonic, x])
 		);
 
-		this._opcodesByValue = new Map
-		(
-			this.opcodes.map(x => [x.value, x])
-		);
+		this._opcodesByValue = new Map();
+		this.opcodeGroups.forEach(opcodeGroup =>
+		{
+			opcodeGroup.opcodes.forEach
+			(
+				opcode => this._opcodesByValue.set(opcode.value, opcode)
+			);
+		});
 	}
 
 	static Instances()
@@ -75,9 +79,9 @@ class InstructionSet
 		return instructionRead;
 	}
 
-	opcodeByMnemonic(opcodeMnemonic)
+	opcodeGroupByMnemonic(opcodeGroupMnemonic)
 	{
-		return this._opcodesByMnemonic.get(opcodeMnemonic);
+		return this._opcodeGroupsByMnemonic.get(opcodeGroupMnemonic);
 	}
 
 	opcodeByValue(opcodeValue)
