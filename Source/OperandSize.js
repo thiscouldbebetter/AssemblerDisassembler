@@ -55,17 +55,17 @@ class OperandSize_Instances
 
 		this.DoubleWord = new OperandSize
 		(
-			"Double-word"
+			"Double-word", 16
 		);
 
 		this.ElevenBits = new OperandSize
 		(
-			"ElevenBits"
+			"ElevenBits", 11
 		);
 
 		this.ThreeBits = new OperandSize
 		(
-			"ThreeBits"
+			"ThreeBits", 3
 		);
 
 		this.Word = new OperandSize

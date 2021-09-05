@@ -391,7 +391,7 @@ class InstructionSet_x86
 
 		if (mnemonic == "db" || mnemonic == "dw")
 		{
-			opcode = new Opcode("data");
+			opcode = new Opcode("data"); // hack
 			var dataToWriteAsString = "";
 
 			var operandsAsString = assemblyCode.substr(mnemonic.length + 1);
@@ -715,13 +715,13 @@ class InstructionSet_x86
 
 		var opcode = instruction.opcode;
 		var reverseOperandsFlag = (opcode.value >> 1) & 1;
-		var areOperandsReversed = (reverseOperandsFlag == 1);
+		var areOperandsReversed = (reverseOperandsFlag == 0);
 		if (areOperandsReversed)
 		{
 			operands = operands.slice().reverse();
 		}
 
-		for (var i = operands.length - 1; i >= 0; i--)
+		for (var i = 0; i < operands.length; i++)
 		{
 			var operand = operands[i];
 			operand.writeToBitStream(bitStream);

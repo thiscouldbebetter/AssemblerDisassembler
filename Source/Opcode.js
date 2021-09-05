@@ -12,6 +12,7 @@ class Opcode
 		if (this.value == "data")
 		{
 			var operand = instruction.operands[0];
+			bitStream.writeAlignOnBoundary(16);
 			bitStream.writeString(operand.value);
 		}
 		else

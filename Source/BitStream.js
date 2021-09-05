@@ -86,6 +86,20 @@ class BitStream
 		return returnValue;
 	}
 
+	writeAlignOnBoundary(bitModulusToAlignOn)
+	{
+		var bitOffsetAbsolute =
+			this.byteOffset * BitStream.BitsPerByte
+			+ this.bitOffsetWithinByteCurrent;
+		var bitRemainder = bitOffsetAbsolute % bitModulusToAlignOn;
+		var numberOfBitsToWrite =
+			(bitRemainder == 0 ? 0 : bitModulusToAlignOn - bitRemainder);
+		for (var i = 0; i < numberOfBitsToWrite; i++)
+		{
+			this.writeBit(0);
+		}
+	}
+
 	writeBit(bitToWrite)
 	{
 		if (this.hasMoreBits() == false)
@@ -102,6 +116,11 @@ class BitStream
 		this.bitOffsetIncrement();
 	}
 
+	writeByte(byteToWrite)
+	{
+		this.writeIntegerUsingBitWidth(byteToWrite, BitStream.BitsPerByte);
+	}
+
 	writeIntegerUsingBitWidth(integerToWrite, bitWidth)
 	{
 		for (var i = 0; i < bitWidth; i++)
@@ -110,11 +129,6 @@ class BitStream
 			var bitToWrite = (integerToWrite >> placesToShift) & 1;
 			this.writeBit(bitToWrite);
 		}
-	}
-
-	writeByte(byteToWrite)
-	{
-		this.writeIntegerUsingBitWidth(byteToWrite, 8);
 	}
 
 	writeString(stringToWrite)
