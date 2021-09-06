@@ -29,9 +29,10 @@ class InstructionSet_x86_16
 
 		// More complex operand parsing.
 
-		var opcodeValueFromOperands_Adc = InstructionSet_x86_16.opcodeValueFromOperands_Adc;
-		var operandsRead_Adc = InstructionSet_x86_16.opcodeValueFromOperands_Mov; // todo
-		var operandsWrite_Adc = InstructionSet_x86_16.instructionOperandsWriteToBitStream_Adc;
+		var opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor =
+			InstructionSet_x86_16.opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor;
+		var instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor =
+			InstructionSet_x86_16.instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor;
 
 		var opcodeValueFromOperands_Mov = InstructionSet_x86_16.opcodeValueFromOperands_Mov;
 		var operandsRead_Mov = InstructionSet_x86_16.operandsReadFromBitStream_Mov;
@@ -57,35 +58,53 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"adc",
-				opcodeValueFromOperands_Adc,
-				operandsRead_Adc,
-				operandsWrite_Adc,
+				(opds) => 0x10 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(operands),
+				() => { throw("todo"); },
+				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
 				[
 					new Opcode(0x10, "add with carry r/m8 r8"),
 					new Opcode(0x11, "add with carry r/m16 r16"),
 					new Opcode(0x12, "add with carry r8 r/m8"),
 					new Opcode(0x13, "add with carry r16 r/m16"),
 					new Opcode(0x14, "add with carry al imm8"),
-					new Opcode(0x15, "add with carry ax imm16"),
+					new Opcode(0x15, "add with carry ax imm16")
+				]
+			),
+
+			// adds
+			new OpcodeGroup
+			(
+				"add",
+				(opds) => 0x0 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
+				() => { throw("todo"); },
+				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
+				[
+					new Opcode(0x00, "add r/m8 r8"),
+					new Opcode(0x01, "add r/m16 r16"),
+					new Opcode(0x02, "add r8 r/m8"),
+					new Opcode(0x03, "add r16 r/m16"),
+					new Opcode(0x04, "add al imm8"),
+					new Opcode(0x05, "add ax imm16")
+				]
+			),
+
+			new OpcodeGroup
+			(
+				"and",
+				(opds) => 0x20 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
+				() => { throw("todo"); },
+				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
+				[
+					new Opcode(0x20, "and r/m8 r8"),
+					new Opcode(0x21, "and r/m16 r16"),
+					new Opcode(0x22, "and r8 r/m8"),
+					new Opcode(0x23, "and r16 r/m16"),
+					new Opcode(0x24, "and al imm8"),
+					new Opcode(0x25, "and eax imm16")
 				]
 			),
 
 			/*
-			// adds
-			new o("add_rmrb", 	0x00, null, 	null, "add r/m8 r8"),
-			new o("add_rrw", 	0x01, null, 	null, "add r/m16 r16"),
-			new o("add_rrmb", 	0x02, null, 	null, "add r8 r/m8"),
-			new o("add_rrmw", 	0x03, null, 	null, "add r16 r/m16"),
-			new o("add_aib", 	0x04, _8, 		null, "add al imm8"),
-			new o("add_aiw", 	0x05, _16, 		null, "add eax imm16"),
-
-			new o("and_rmrb", 	0x20, null, 	null, "and r/m8 r8"),
-			new o("and_rmrw", 	0x21, null, 	null, "and r/m16 r16"),
-			new o("and_rrmb", 	0x22, null, 	null, "and r8 r/m8"),
-			new o("and_rrmw", 	0x23, null, 	null, "and r16 r/m16"),
-			new o("and_aib", 	0x24, _8, 		null, "and al imm8"),
-			new o("and_aiw", 	0x25, _16, 		null, "and eax imm16"),
-
 			new o("arith0", 	0x80, null, 		null, "add,or,adc,sbb,and,sub,xor,cmp r/m8 imm8"),
 			new o("arith1", 	0x81, null, 		null, "add,or,adc,sbb,and,sub,xor,cmp r/m16 imm16"),
 			new o("arith2", 	0x82, null, 		null, "add,or,adc,sbb,and,sub,xor,cmp r/m8 imm8"),
@@ -115,7 +134,7 @@ class InstructionSet_x86_16
 			new o("cmp2", 		0x3A, null, 		null, "compare r8 r/m8"),
 			new o("cmp3", 		0x3B, null, 		null, "compare r16 r/m16"),
 			new o("cmp4", 		0x3C, null, 		null, "compare al imm8"),
-			new o("cmp5", 		0x3D, null, 		null, "add eax imm16"),
+			new o("cmp5", 		0x3D, null, 		null, "compare eax imm16"),
 			new o("cmpsb", 		0xA6, null, 		null, "compare bytes in memory"),
 			new o("cmpsw", 		0xA7, null, 		null, "compare words"),
 
@@ -227,9 +246,11 @@ class InstructionSet_x86_16
 					new Opcode(0x89, "move r/m16 r16"),
 					new Opcode(0x8A, "move r8 r/m8"),
 					new Opcode(0x8B, "move r16 r/m16"),
-					new Opcode(0xB8, "move ax imm8"),
+					new Opcode(0xB8, "move al imm8"),
+					new Opcode(0xB9, "move ax imm16"),
 				]
 			),
+
 			/*
 			new o("", 	0x8C, movRead, movWrite, 	"move r/m16 Sreg"),
 			new o("", 	0x8E, movRead, movWrite, 	"move Sreg r/m16"),
@@ -243,7 +264,7 @@ class InstructionSet_x86_16
 			new o("mov", r6i8" ], 	0xB6, movRead, movWrite, 	"move r6 imm8"),
 			new o("mov", r7i8" ], 	0xB7, movRead, movWrite, 	"move r7 imm8"),
 			new o("mov", 16r0" ], 	0xB8, movRead, movWrite, 	"move r0 (ax?) imm16"),
-			new o("mov", r1iw" ], 	0xB9, movRead, movWrite, 	"move r1 imm16"),
+			
 			new o("mov", r2iw" ], 	0xBA, movRead, movWrite, 	"move r2 imm16"),
 			new o("mov", r3iw" ], 	0xBB, movRead, movWrite, 	"move r3 imm16"),
 			new o("mov", r4iw" ], 	0xBC, movRead, movWrite, 	"move r4 imm16"),
@@ -256,12 +277,27 @@ class InstructionSet_x86_16
 			new o("nop", 		0x90, null, 		null, "no operation"),
 
 			//new o("not", ?, null, "logical not"),
-			new o("or0", 		0x08, null, 		null, "or r/m8 r8"),
-			new o("or1", 		0x09, null, 		null, "or r/m16 r16"),
-			new o("or2", 		0x0A, null, 		null, "or r8 r/m8"),
-			new o("or3", 		0x0B, null, 		null, "or r16 r/m16"),
-			new o("or4", 		0x0C, null, 		null, "or al imm8"),
-			new o("or5", 		0x0D, null, 		null, "or eax imm16"),
+
+			*/
+
+			// ors
+			new OpcodeGroup
+			(
+				"or",
+				(opds) => 0x08 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
+				() => { throw("todo"); },
+				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
+				[
+					new Opcode(0x08, "or r/m8 r8"),
+					new Opcode(0x09, "or r/m16 r16"),
+					new Opcode(0x0A, "or r8 r/m8"),
+					new Opcode(0x0B, "or r16 r/m16"),
+					new Opcode(0x0C, "or al imm8"),
+					new Opcode(0x0D, "or eax imm16"),
+				]
+			),
+
+			/*
 			new o("out0", 		0xEE, null, 		null, "out dx al"),
 			new o("out1", 		0xEF, null, 		null, "out dx eax"),
 			new o("outsb", 		0x6E, null, 		null, "output dx m8"),
@@ -307,14 +343,26 @@ class InstructionSet_x86_16
 			new o("shrotw1", 	0xD1, null, 		null, "shift/rotate r/m16 1"),
 			new o("sahf", 		0x9E, null, 		null, "store ah into flags"),
 
-			// subtracts with borrow
-			new o("sbb0", 		0x18, null, 		null, "subtraction with borrow r/m8 r8"),
-			new o("sbb1", 		0x19, null, 		null, "subtraction with borrow r/m16 r16"),
-			new o("sbb2", 		0x1A, null, 		null, "subtraction with borrow r8 r/m8"),
-			new o("sbb3", 		0x1B, null, 		null, "subtraction with borrow r16 r/m16"),
-			new o("sbb4", 		0x1C, null, 		null, "subtraction with borrow al imm8"),
-			new o("sbb5", 		0x1D, null, 		null, "subtraction with borrow eax imm16"),
+			*/
 
+			// subtracts with borrow
+			new OpcodeGroup
+			(
+				"sbb",
+				(opds) => 0x18 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
+				() => { throw("todo"); },
+				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
+				[
+					new Opcode(0x18, "subtraction with borrow r/m8 r8"),
+					new Opcode(0x19, "subtraction with borrow r/m16 r16"),
+					new Opcode(0x1A, "subtraction with borrow r8 r/m8"),
+					new Opcode(0x1B, "subtraction with borrow r16 r/m16"),
+					new Opcode(0x1C, "subtraction with borrow al imm8"),
+					new Opcode(0x1D, "subtraction with borrow ax imm16")
+				]
+			),
+
+			/*
 			new o("scasb", 		0xAE, null, 		null, "compare byte string"),
 			new o("scasw", 		0xAF, null, 		null, "compare word string"),
 			new o("seges", 		0x26, null, 		null, "es prefix"),
@@ -325,15 +373,26 @@ class InstructionSet_x86_16
 			new o("sti", 		0xFB, null, 		null, "set interrupt flag"),
 			new o("stosb", 		0xAA, null, 		null, "store byte in string"),
 			new o("stosw", 		0xAB, null, 		null, "store word in string"),
- 
-			// subtracts
-			new o("sub0", 		0x28, null, 		null, "subtract r/m8 r8"),
-			new o("sub1", 		0x29, null, 		null, "subtract r/m16 r16"),
-			new o("sub2", 		0x2A, null, 		null, "subtract r8 r/m8"),
-			new o("sub3", 		0x2B, null, 		null, "subtract r16 r/m16"),
-			new o("sub4", 		0x2C, null, 		null, "subtract al imm8"),
-			new o("sub5", 		0x2D, null, 		null, "subtract eax imm16"),
+			*/
 
+			// subtracts
+			new OpcodeGroup
+			(
+				"sub",
+				(opds) => 0x28 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
+				() => { throw("todo"); },
+				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
+				[
+					new Opcode(0x28, "subtract r/m8 r8"),
+					new Opcode(0x29, "subtract r/m16 r16"),
+					new Opcode(0x2A, "subtract r8 r/m8"),
+					new Opcode(0x2B, "subtract r16 r/m16"),
+					new Opcode(0x2C, "subtract al imm8"),
+					new Opcode(0x2D, "subtract ax imm16"),
+				]
+			),
+
+			/*
 			new o("wait", 		0x9B, null, 		null, "wait until not busy"),
 
 			// exchanges
@@ -349,13 +408,23 @@ class InstructionSet_x86_16
 			new o("xchgrrw", 	0x86, null, 		null, "exchange registers 16"),
 
 			new o("xlat", 		0xD7, null, 		null, "table look-up translation"),
-			new o("xor0", 		0x30, null, 		null, "xor r/m8 r8"),
-			new o("xor1", 		0x31, null, 		null, "xor r/m16 r16"),
-			new o("xor2", 		0x32, null, 		null, "xor r8 r/m8"),
-			new o("xor3", 		0x33, null, 		null, "xor r16 r/m16"),
-			new o("xor4", 		0x34, null, 		null, "xor al imm8"),
-			new o("xor5", 		0x35, null, 		null, "xor eax imm16")
 			*/
+
+			new OpcodeGroup
+			(
+				"xor",
+				(opds) => 0x30 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
+				() => { throw("todo"); },
+				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
+				[
+					new o(0x30, "xor r/m8 r8"),
+					new o(0x31, "xor r/m16 r16"),
+					new o(0x32, "xor r8 r/m8"),
+					new o(0x33, "xor r16 r/m16"),
+					new o(0x34, "xor al imm8"),
+					new o(0x35, "xor ax imm16")
+				]
+			)
 		];
 
 		var instructionSet = new InstructionSet
@@ -437,15 +506,13 @@ class InstructionSet_x86_16
 		return instruction;
 	}
 
-	static opcodeValueFromOperands_Adc(operands)
+	static opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(operands)
 	{
-		var opcodeValue = null;
+		var opcodeOffset = null;
 
 		var operand0 = operands[0];
 		var operand1 = operands[1];
 
-		// Ignore operand0, it's always al or ax.
-		// Maybe that should be validated, though.
 		var operand0Type = operand0.operandType;
 		var operand0RoleName = operand0Type.role.name;
 		var operand0SizeInBits = operand0Type.size.sizeInBits;
@@ -458,13 +525,13 @@ class InstructionSet_x86_16
 
 		if (operand1RoleName == operandRolesAll.Immediate.name)
 		{
-			opcodeValue = (operand1SizeInBits == 8 ? 0x14 : 0x15);
+			opcodeOffset = (operand1SizeInBits == 8 ? 4 : 5);
 		}
 		else if (operand1RoleName == operandRolesAll.RegisterContents.name)
 		{
 			if (operand0RoleName == operandRolesAll.RegisterContents.name)
 			{
-				opcodeValue = (operand1SizeInBits == 8 ? 0x10 : 0x11);
+				opcodeOffset = (operand1SizeInBits == 8 ? 0 : 1);
 			}
 			else
 			{
@@ -480,12 +547,12 @@ class InstructionSet_x86_16
 			throw("Unexpected operand role!");
 		}
 
-		return opcodeValue;
+		return opcodeOffset;
 	}
 
 	static opcodeValueFromOperands_Mov(operands)
 	{
-		var opcodeValue = null;
+		var opcodeOffset = null;
 
 		var operand0 = operands[0];
 		var operand1 = operands[1];
@@ -508,19 +575,19 @@ class InstructionSet_x86_16
 		{
 			if (operand1RoleName == operandRolesAll.Immediate.name)
 			{
-				opcodeValue = 0xB8;
+				opcodeOffset = 0x30;
 			}
 			else if (operand1RoleName == operandRolesAll.RegisterContents.name)
 			{
-				opcodeValue = (operand0SizeInBits == 8 ? 0x88 : 0x89);
+				opcodeOffset = 0;
 			}
 			else if (operand1RoleName == operandRolesAll.MemoryAtAddressInRegister.name)
 			{
-				opcodeValue = (operand0SizeInBits == 8 ? 0x8A : 0x8B);
+				opcodeOffset = 2;
 			}
 			else if (operand1RoleName == operandRolesAll.MemoryAtAddressInRegisterPlusOffset.name)
 			{
-				opcodeValue = (operand0SizeInBits == 8 ? 0x8A : 0x8B);
+				opcodeOffset = 2;
 			}
 		}
 		else if (operand0RoleName == operandRolesAll.MemoryAtAddressInRegister.name)
@@ -531,7 +598,7 @@ class InstructionSet_x86_16
 			}
 			else if (operand1RoleName == operandRolesAll.RegisterContents.name)
 			{
-				opcodeValue = (operand0SizeInBits == 8 ? 0x88 : 0x89);
+				opcodeOffset = 0;
 			}
 			else if (operand1RoleName == operandRolesAll.MemoryAtAddressInRegister.name)
 			{
@@ -550,7 +617,7 @@ class InstructionSet_x86_16
 			}
 			else if (operand1RoleName == operandRolesAll.RegisterContents.name)
 			{
-				opcodeValue = (operand0SizeInBits == 8 ? 0x88 : 0x89);
+				opcodeOffset = 0;
 			}
 			else if (operand1RoleName == operandRolesAll.MemoryAtAddressInRegister.name)
 			{
@@ -561,6 +628,12 @@ class InstructionSet_x86_16
 				throw("Not yet implemented!");
 			}
 		}
+
+		var opcodeOffsetForSize = (operand0SizeInBits == 8 ? 0 : 1);
+		opcodeOffset += opcodeOffsetForSize;
+
+		var opcodeBase = 0x88;
+		var opcodeValue = opcodeBase + opcodeOffset;
 
 		return opcodeValue;
 	}
@@ -678,7 +751,10 @@ class InstructionSet_x86_16
 		throw("todo");
 	}
 
-	static instructionOperandsWriteToBitStream_Adc(instruction, bitStream)
+	static instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor
+	(
+		instruction, bitStream
+	)
 	{
 		var operands = instruction.operands;
 
