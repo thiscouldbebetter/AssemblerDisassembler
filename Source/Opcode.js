@@ -7,6 +7,17 @@ class Opcode
 		this.description = description || "";
 	}
 
+	instructionSizeInBytes(instructionSet, instruction)
+	{
+		var bitStreamDummy = new BitStream();
+		this.instructionWriteToBitStream
+		(
+			instructionSet, instruction, bitStreamDummy
+		);
+		var returnSize = bitStreamDummy.bytes.length;
+		return returnSize;
+	}
+
 	instructionWriteToBitStream(instructionSet, instruction, bitStream)
 	{
 		if (this.value == "data") // hack
@@ -14,6 +25,10 @@ class Opcode
 			var operand = instruction.operands[0];
 			bitStream.writeAlignOnBoundary(16);
 			bitStream.writeString(operand.value);
+		}
+		else if (this.value == "label") // hack
+		{
+			// Don't write anything.
 		}
 		else
 		{

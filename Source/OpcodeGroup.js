@@ -31,6 +31,10 @@ class OpcodeGroup
 	{
 		var opcodeValue = this._opcodeValueFromOperands(operands);
 		var opcode = this.opcodeByValue(opcodeValue);
+		if (opcode == null)
+		{
+			throw("Opcode could not be determined from operands!")
+		}
 		return opcode;
 	}
 

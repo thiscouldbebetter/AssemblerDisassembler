@@ -21,11 +21,22 @@ class Program
 		(
 			y => y.length > 0
 		);
+
 		var instructions = instructionsAsStrings.map
 		(
 			x => instructionSet.instructionFromAssemblyCode(x)
 		);
-		
+
+		var programSizeInBytesSoFar = 0;
+
+		instructions.forEach(instruction =>
+		{
+			instruction.offsetInBytes = programSizeInBytesSoFar;
+			var instructionSizeInBytes =
+				instruction.sizeInBytes(instructionSet);
+			programSizeInBytesSoFar += instructionSizeInBytes;
+		});
+
 		var returnValue =
 			new Program(name, instructionSetName, instructions);
 

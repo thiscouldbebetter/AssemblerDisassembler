@@ -64,6 +64,7 @@ class OperandRole_Instances
 		this.Data = new OperandRole("Data", "d");
 		this.Immediate =
 			new OperandRole("Immediate", "i");
+		this.LabelName = new OperandRole("LabelName", "l");
 		this.RegisterContents =
 			new OperandRole("RegisterContents", "r");
 		this.MemoryAtAddressInRegister =
@@ -75,6 +76,7 @@ class OperandRole_Instances
 		[
 			this.Data,
 			this.Immediate,
+			this.LabelName,
 			this.RegisterContents,
 			this.MemoryAtAddressInRegister,
 			this.MemoryAtAddressInRegisterPlusOffset

@@ -5,6 +5,8 @@ class Instruction //
 	{
 		this.opcode = opcode;
 		this.operands = operands;
+
+		this.offsetInBytes = null;
 	}
 
 	clone()
@@ -16,6 +18,11 @@ class Instruction //
 	{
 		this.operands = this.operands.reverse();
 		return this;
+	}
+
+	sizeInBytes(instructionSet)
+	{
+		return this.opcode.instructionSizeInBytes(instructionSet, this);
 	}
 
 	toString()

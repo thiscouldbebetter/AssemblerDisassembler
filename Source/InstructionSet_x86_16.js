@@ -9,8 +9,6 @@ class InstructionSet_x86_16
 
 	static build()
 	{
-		var o = Opcode;
-
 		// Simple operand parsing.
 
 		// Common operand bit width arrays.
@@ -127,14 +125,26 @@ class InstructionSet_x86_16
 			new o("cli", 		0xFA, _0, 			null, "clear interrupt flag"),
 
 			new o("cmc", 		0xF5, _0, 			null, "complement carry flag"),
+			*/
 
 			// compares
-			new o("cmp0", 		0x38, null, 		null, "compare r/m8 r8"), // 0x05, 0x80/0..., 0x83/0
-			new o("cmp1", 		0x39, null, 		null, "compare r/m16 r16"),
-			new o("cmp2", 		0x3A, null, 		null, "compare r8 r/m8"),
-			new o("cmp3", 		0x3B, null, 		null, "compare r16 r/m16"),
-			new o("cmp4", 		0x3C, null, 		null, "compare al imm8"),
-			new o("cmp5", 		0x3D, null, 		null, "compare eax imm16"),
+			new OpcodeGroup
+			(
+				"cmp",
+				(opds) => 0x20 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
+				() => { throw("todo"); },
+				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
+				[
+					new Opcode(0x38, "compare r/m8 r8"), // 0x05, 0x80/0..., 0x83/0
+					new Opcode(0x39, "compare r/m16 r16"),
+					new Opcode(0x3A, "compare r8 r/m8"),
+					new Opcode(0x3B, "compare r16 r/m16"),
+					new Opcode(0x3C, "compare al imm8"),
+					new Opcode(0x3D, "compare eax imm16"),
+				]
+			),
+
+			/*
 			new o("cmpsb", 		0xA6, null, 		null, "compare bytes in memory"),
 			new o("cmpsw", 		0xA7, null, 		null, "compare words"),
 
@@ -145,17 +155,29 @@ class InstructionSet_x86_16
 			// decimal adjusts
 			new o("daa", 		0x27, null, 		null, "decimal adjust al after add"),
 			new o("das", 		0x2F, null, 		null, "decimal adjust al after sub"),
+			*/
 
 			// decrements
-			new o("decr0", 		0x48, _0, 			null, "decrement register 0 (ax?)"),
-			new o("decr1", 		0x49, _0, 			null, "decrement register 1"),
-			new o("decr2", 		0x4A, _0, 			null, "decrement register 2"),
-			new o("decr3", 		0x4B, _0, 			null, "decrement register 3"),
-			new o("decr4", 		0x4C, _0, 			null, "decrement register 4"),
-			new o("decr5", 		0x4D, _0, 			null, "decrement register 5"),
-			new o("decr6", 		0x4E, _0, 			null, "decrement register 6"),
-			new o("decr7", 		0x4F, _0, 			null, "decrement register 7"),
 
+			new OpcodeGroup
+			(
+				"dec",
+				(opds) => { return 0x48 + (opds[0].value) },
+				() => { throw("todo"); },
+				(ins, bs) => {},
+				[
+					new Opcode(0x48, "decrement ax"),
+					new Opcode(0x49, "decrement cx"),
+					new Opcode(0x4A, "decrement dx"),
+					new Opcode(0x4B, "decrement bx"),
+					new Opcode(0x4C, "decrement ?"),
+					new Opcode(0x4D, "decrement ?"),
+					new Opcode(0x4E, "decrement ?"),
+					new Opcode(0x4F, "decrement ?")
+				]
+			),
+
+			/*
 			new o("div", 		0xF6, null, 		null, "unsigned divide"), // 0xF6/6, 0xF7/6
 
 			// e
@@ -177,27 +199,66 @@ class InstructionSet_x86_16
 			new o("insw/d", 	0x6D, null, 		null, "input from port to string m16 dx"),
 			new o("inb", 		0xE4, null, 		null, "input reg from port al imm8"),
 			new o("ins", 		0xE5, null, 		null, "input reg from port eax imm16"),
+			*/
 
 			// increments
-			new o("incr0", 		0x40, _0, 			null, "increment r0 (ax?)"),
-			new o("incr1", 		0x41, _0, 			null, "increment r1"),
-			new o("incr2", 		0x42, _0, 			null, "increment r2"),
-			new o("incr3", 		0x43, _0, 			null, "increment r3"),
-			new o("incr4", 		0x44, _0, 			null, "increment register 4"),
-			new o("incr5", 		0x45, _0, 			null, "increment register 5"),
-			new o("incr6", 		0x46, _0, 			null, "increment register 6"),
-			new o("incr7", 		0x47, _0, 			null, "increment register 7"),
+			new OpcodeGroup
+			(
+				"inc",
+				(opds) => { return 0x40 + (opds[0].value) },
+				() => { throw("todo"); },
+				(ins, bs) => {},
+				[
+					new Opcode(0x40, "increment r0 (ax?)"),
+					new Opcode(0x41, "increment r1"),
+					new Opcode(0x42, "increment r2"),
+					new Opcode(0x43, "increment r3"),
+					new Opcode(0x44, "increment register 4"),
+					new Opcode(0x45, "increment register 5"),
+					new Opcode(0x46, "increment register 6"),
+					new Opcode(0x47, "increment register 7"),
+				]
+			),
 
+			/*
 			new o("int", 		0xCD, null, 		null, "call to interrupt"),
 			new o("into", 		0xCE, null, 		null, "call to interrupt if overflow"),
 			new o("iret", 		0xCF, null, 		null, "return from interrupt"),
 
+			*/
+
 			// j
 
 			// jumps
-			new o("jmp_w", 		0xE9, _16, 			null, "jump rel16"),
-			new o("jmp_f", 		0xEA, null, 		null, "jump ptr16:16"),
-			new o("jmp_b", 		0xEB, _8, 			null, "jump rel8"),
+			new OpcodeGroup
+			(
+				"jmp",
+				(opds) =>
+				{
+					var returnOpcode = null;
+
+					var operand0Value = opds[0].value;
+					if (operand0Value < 0)
+					{
+						// todo
+					}
+					else if (operand0Value < 255)
+					{
+						returnOpcode = 0xEB;
+					}
+
+					return returnOpcode;
+				},
+				() => { throw("todo"); },
+				(ins, bs) => {},
+				[
+					new Opcode(0xE9, "jump rel16"),
+					new Opcode(0xEA, "jump ptr16:16"),
+					new Opcode(0xEB, "jump rel8")
+				]
+			),
+
+			/*
 			new o("jo", 		0x70, null, 		null, "jump if 0"), 
 			new o("jno", 		0x71, null, 		null, "jump if not 0"),
 			new o("jb/nae/c", 	0x72, null, 		null, "jb/nae/c"),
@@ -417,12 +478,12 @@ class InstructionSet_x86_16
 				() => { throw("todo"); },
 				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
 				[
-					new o(0x30, "xor r/m8 r8"),
-					new o(0x31, "xor r/m16 r16"),
-					new o(0x32, "xor r8 r/m8"),
-					new o(0x33, "xor r16 r/m16"),
-					new o(0x34, "xor al imm8"),
-					new o(0x35, "xor ax imm16")
+					new Opcode(0x30, "xor r/m8 r8"),
+					new Opcode(0x31, "xor r/m16 r16"),
+					new Opcode(0x32, "xor r8 r/m8"),
+					new Opcode(0x33, "xor r16 r/m16"),
+					new Opcode(0x34, "xor al imm8"),
+					new Opcode(0x35, "xor ax imm16")
 				]
 			)
 		];
@@ -485,6 +546,18 @@ class InstructionSet_x86_16
 			var operand = new Operand(operandType, dataToWriteAsString);
 			operands = [ operand ];
 		}
+		else if (mnemonic.endsWith(":"))
+		{
+			opcode = new Opcode("label"); // hack
+
+			var labelName = mnemonic.substr(0, mnemonic.length - 1);
+
+			var operandRole = OperandRole.Instances().LabelName;
+			var operandSize = new OperandSize("label", labelName.length);
+			var operandType = new OperandType(operandRole, operandSize);
+			var operand = new Operand(operandType, labelName);
+			operands = [ operand ];
+		}
 		else
 		{
 			var operandsAsStrings = mnemonicAndOperands.slice(1);
@@ -497,6 +570,11 @@ class InstructionSet_x86_16
 
 			var opcodeGroup =
 				instructionSet.opcodeGroupByMnemonic(mnemonic);
+
+			if (opcodeGroup == null)
+			{
+				throw("Unrecognized mnemonic: " + mnemonic);
+			}
 
 			var opcode = opcodeGroup.opcodeFromOperands(operands);
 		}
@@ -727,12 +805,18 @@ class InstructionSet_x86_16
 				operandRole = operandRoles.MemoryAtAddressInRegister;
 			}
 		}
-		else if (operandAsString.length == 2)
+		else if (registerValuesByName.has(operandAsString))
 		{
 			operandRole = operandRoles.RegisterContents;
 
 			var registerName = operandAsString;
 			operandValue = registerValuesByName.get(registerName);
+		}
+		else
+		{
+			operandRole = operandRoles.LabelName;
+			operandSize = new OperandSize("LabelName", operandAsString.length);
+			operandValue = operandAsString;
 		}
 
 		if (operandValue == null)
