@@ -4,6 +4,7 @@ class OpcodeGroup
 	constructor
 	(
 		mnemonic,
+		operandsIncludeLabel,
 		opcodeValueFromOperands,
 		operandsReadFromBitStream,
 		instructionOperandsWriteToBitStream,
@@ -11,6 +12,7 @@ class OpcodeGroup
 	)
 	{
 		this.mnemonic = mnemonic;
+		this.operandsIncludeLabel = operandsIncludeLabel;
 		this._opcodeValueFromOperands = opcodeValueFromOperands;
 		this._operandsReadFromBitStream = operandsReadFromBitStream;
 		this._instructionOperandsWriteToBitStream =
