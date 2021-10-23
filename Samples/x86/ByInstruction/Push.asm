@@ -15,3 +15,9 @@ db 'push bp',0
 push bp
 db 'push sp',0
 push sp
+
+db 'push LabelOne',0
+push LabelOne
+
+LabelOne:
+db 'LabelOne',0

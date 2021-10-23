@@ -20,7 +20,7 @@ class InstructionSet_x86_16
 		var operandsRead_Mov = InstructionSet_x86_16.operandsReadFromBitStream_Mov;
 		var operandsWrite_Mov = InstructionSet_x86_16.instructionOperandsWriteToBitStream_Mov;
 
-		var operandsToOpcodeJump = (opds) =>
+		var operandsToOpcodeCallOrJump = (opcodeValueBase, opds) =>
 		{
 			var returnOpcode = null;
 
@@ -34,16 +34,27 @@ class InstructionSet_x86_16
 				var destinationSizeInBits =
 					operandDestination.operandType.size.sizeInBits;
 				returnOpcode =
-					(destinationSizeInBits == 8 ? 0xEB : 0xE9);
+					opcodeValueBase
+					+ (destinationSizeInBits != 8 ? 0 : 2);
 			}
 			else
 			{
-				returnOpcode = 0xE9; // Assuming two-byte destination.
+				returnOpcode = opcodeValueBase; // Assuming two-byte destination.
 			}
 			return returnOpcode;
 		};
 
-		var writeInstructionToBitStreamJump = (ins, bs) =>
+		var operandsToOpcodeCall = (opds) =>
+		{
+			return operandsToOpcodeCallOrJump(0x9A, opds);
+		};
+
+		var operandsToOpcodeJump = (opds) =>
+		{
+			return operandsToOpcodeCallOrJump(0xE9, opds);
+		};
+
+		var writeInstructionToBitStreamCallOrJump = (ins, bs) =>
 		{
 			var operandDestination = ins.operands[0];
 			var destinationSizeInBits =
@@ -58,6 +69,7 @@ class InstructionSet_x86_16
 				destinationSizeInBits
 			);
 		};
+
 
 		var opcodeGroups =
 		[
@@ -142,7 +154,22 @@ class InstructionSet_x86_16
 
 			// c
 
-			new o("call", 		0x9A, null, 		null, "call procedure"), // 0xE8, 0xFF/2, 0xFF/3
+			*/
+
+			new OpcodeGroup
+			(
+				"call",
+				true, // operandsIncludeLabel
+				operandsToOpcodeCall,
+				() => { throw("todo"); },
+				writeInstructionToBitStreamCallOrJump,
+				[
+					new Opcode(0x9A, "call interrupt routine"),
+				]
+			),
+
+			/*
+
 			new o("cbw", 		0x98, null, 		null, "convert byte to word"),
 
 			// clears
@@ -249,8 +276,19 @@ class InstructionSet_x86_16
 				]
 			),
 
+			new OpcodeGroup
+			(
+				"int",
+				false, // operandsIncludeLabel
+				(opds) => { return 0xCD; },
+				() => { throw("todo"); },
+				(ins, bs) => {},
+				[
+					new Opcode(0xCD, "call interrupt routine"),
+				]
+			),
+
 			/*
-			new o("int", 		0xCD, null, 		null, "call to interrupt"),
 			new o("into", 		0xCE, null, 		null, "call to interrupt if overflow"),
 			new o("iret", 		0xCF, null, 		null, "return from interrupt"),
 
@@ -266,7 +304,7 @@ class InstructionSet_x86_16
 				true, // operandsIncludeLabel
 				operandsToOpcodeJump,
 				() => { throw("todo"); },
-				writeInstructionToBitStreamJump,
+				writeInstructionToBitStreamCallOrJump,
 				[
 					new Opcode(0xE9, "jump rel16"),
 					new Opcode(0xEA, "jump ptr16:16"),
@@ -578,6 +616,18 @@ class InstructionSet_x86_16
 				]
 			),
 
+			new OpcodeGroup
+			(
+				"org",
+				false, // operandsIncludeLabel
+				(opds) => "org", // opcodeFromOperands
+				() => { throw("todo"); },
+				(ins, bs) => {},
+				[
+					new Opcode("org", "set offset of program"),
+				]
+			),
+
 			/*
 			new o("out0", 		0xEE, null, 		null, "out dx al"),
 			new o("out1", 		0xEF, null, 		null, "out dx eax"),
@@ -618,10 +668,35 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"push",
-				false, // operandsIncludeLabel
-				(opds) => { return 0x50 + (opds[0].value) },
+				true, // operandsIncludeLabel
+				(opds) =>
+				{
+					var returnOpcode = null;
+
+					var operand0 = opds[0];
+					var operand0Value = operand0.value;
+					var operand0TypeRoleName = operand0.operandType.role.name;
+
+					var isOperand0ALabel = (operand0TypeRoleName == "LabelName")
+					if (isOperand0ALabel)
+					{
+						returnOpcode = 0x6A;
+					}
+					else
+					{
+						returnOpcode = 0x50 + operand0Value
+					}
+					return returnOpcode;
+				},
 				() => { throw("todo"); },
-				(ins, bs) => {},
+				(ins, bs) =>
+				{
+					var opcodeValue = ins.opcode.value;
+					if (opcodeValue == 0x6A)
+					{
+						bs.writeIntegerUsingBitWidth(opcodeValue, 8);
+					}
+				},
 				[
 					new Opcode(0x50, "push ax onto stack"),
 					new Opcode(0x51, "push cx onto stack"),
@@ -630,7 +705,8 @@ class InstructionSet_x86_16
 					new Opcode(0x54, "push sp onto stack"),
 					new Opcode(0x55, "push bp onto stack"),
 					new Opcode(0x56, "push si onto stack"),
-					new Opcode(0x57, "push di onto stack")
+					new Opcode(0x57, "push di onto stack"),
+					new Opcode(0x6A, "push memory contents at label onto stack")
 				]
 			),
 
@@ -649,6 +725,25 @@ class InstructionSet_x86_16
 			new o("retf1", 		0xCB, null, 		null, "return from procedure"),
 			new o("retn0", 		0xC2, null, 		null, "return from near procedure"),
 			new o("retn1", 		0xC3, null, 		null, "return from near procedure"),
+			*/
+
+			new OpcodeGroup
+			(
+				"ret",
+				false, // operandsIncludeLabel
+				(opds) => { return 0xC2; }, // todo
+				() => { throw("todo"); },
+				(ins, bs) => {},
+				[
+					new Opcode(0xC2, "return from near procedure"),
+					new Opcode(0xC3, "return from near procedure"),
+					new Opcode(0xCA, "return from procedure"),
+					new Opcode(0xCB, "return from procedure"),
+
+				]
+			),
+
+			/*
 
 			// s
 
@@ -709,6 +804,30 @@ class InstructionSet_x86_16
 				]
 			),
 
+			new OpcodeGroup
+			(
+				"times",
+				false, // operandsIncludeLabel
+				(opds) => "times",
+				() => { throw("todo"); },
+				(ins, bs) => {},
+				[
+					new Opcode("times", "repeat next instruction")
+				]
+			),
+
+			new OpcodeGroup
+			(
+				"use16",
+				false, // operandsIncludeLabel
+				(opds) => "use16",
+				() => { throw("todo"); },
+				(ins, bs) => {},
+				[
+					new Opcode("use16", "use 16-bit instructions")
+				]
+			),
+
 			/*
 			new o("wait", 		0x9B, null, 		null, "wait until not busy"),
 
@@ -764,9 +883,13 @@ class InstructionSet_x86_16
 	{
 		var commentDelimiter = ";"
 		assemblyCode = assemblyCode.split(commentDelimiter)[0];
+		if (assemblyCode.trim() == "")
+		{
+			return null;
+		}
 
 		var mnemonicAndOperands =
-			assemblyCode.split(" ").map(x => x.split(",").join("")); 
+			assemblyCode.split(",").join(" ").split(" "); 
 
 		var mnemonic = mnemonicAndOperands[0];
 
