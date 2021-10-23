@@ -53,10 +53,12 @@ class Program
 		);
 
 		// Loop through the program several times, 
-		// compresing" jump instructions each time,
-		// until no more compression is needed 
+		// "compressing" jump instructions each time,
+		// until no more compression is needed.
 
 		var programSizeInBytesPrev = 0;
+
+		var operandRoleLabelName = OperandRole.Instances().LabelName;
 
 		while (programSizeInBytesSoFar != programSizeInBytesPrev)
 		{
@@ -69,23 +71,29 @@ class Program
 
 				var opcode = instruction.opcode;
 				var opcodeGroup = opcode.group;
-				if (opcodeGroup != null && opcodeGroup.operandsIncludeLabel)
+				if (opcodeGroup != null && instruction.doOperandsIncludeLabel())
 				{
 					var operands = instruction.operands;
-					var operandDestination = operands[0];
-					var labelNameToJumpTo = operandDestination.value;
-					var labelInstructionToJumpTo =
-						instructionsForLabelsByName.get(labelNameToJumpTo);
-					var addressToJumpToAbsolute =
-						labelInstructionToJumpTo.offsetInBytes;
-					var addressToJumpToRelative =
-						addressToJumpToAbsolute - instruction.offsetInBytes;
-
-					if (addressToJumpToRelative >= -127 && addressToJumpToRelative <= 128)
+					for (var i = 0; i < operands.length; i++)
 					{
-						// It fits in a single byte.
-						operandDestination.operandType.size.sizeInBits = 8;
-						instruction.opcode = opcodeGroup.opcodes[2]; // hack
+						var operand = operands[i];
+						if (operand.isLabel())
+						{
+							var labelNameToJumpTo = operand.value;
+							var labelInstructionToJumpTo =
+								instructionsForLabelsByName.get(labelNameToJumpTo);
+							var addressToJumpToAbsolute =
+								labelInstructionToJumpTo.offsetInBytes;
+							var addressToJumpToRelative =
+								addressToJumpToAbsolute - instruction.offsetInBytes;
+
+							if (addressToJumpToRelative >= -127 && addressToJumpToRelative <= 128)
+							{
+								// It fits in a single byte.
+								operandDestination.operandType.size.sizeInBits = 8;
+								instruction.opcode = opcodeGroup.opcodes[2]; // hack
+							}
+						}
 					}
 				}
 
@@ -106,24 +114,28 @@ class Program
 
 		instructions.forEach(instruction =>
 		{
-			var opcode = instruction.opcode;
-			var opcodeGroup = opcode.group;
-			if (opcodeGroup.operandsIncludeLabel)
+			if (instruction.doOperandsIncludeLabel())
 			{
 				var operands = instruction.operands;
-				var operandDestination = operands[0];
-				var labelNameToJumpTo = operandDestination.value;
-				var labelInstructionToJumpTo =
-					instructionsForLabelsByName.get(labelNameToJumpTo);
-				var addressToJumpToAbsolute =
-					labelInstructionToJumpTo.offsetInBytes;
-				var instructionSizeInBytes =
-					instruction.sizeInBytes(instructionSet);
-				var addressToJumpToRelative =
-					addressToJumpToAbsolute
-					- instruction.offsetInBytes
-					- instructionSizeInBytes;
-				operandDestination.value = addressToJumpToRelative;
+				for (var i = 0; i < operands.length; i++)
+				{
+					var operand = operands[i];
+					if (operand.isLabel())
+					{
+						var labelNameToJumpTo = operand.value;
+						var labelInstructionToJumpTo =
+							instructionsForLabelsByName.get(labelNameToJumpTo);
+						var addressToJumpToAbsolute =
+							labelInstructionToJumpTo.offsetInBytes;
+						var instructionSizeInBytes =
+							instruction.sizeInBytes(instructionSet);
+						var addressToJumpToRelative =
+							addressToJumpToAbsolute
+							- instruction.offsetInBytes
+							- instructionSizeInBytes;
+						operand.value = addressToJumpToRelative;
+					}
+				}
 			}
 		});
 

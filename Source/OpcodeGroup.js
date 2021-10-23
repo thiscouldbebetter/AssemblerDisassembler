@@ -4,7 +4,6 @@ class OpcodeGroup
 	constructor
 	(
 		mnemonic,
-		operandsIncludeLabel,
 		opcodeValueFromOperands,
 		operandsReadFromBitStream,
 		instructionOperandsWriteToBitStream,
@@ -12,7 +11,6 @@ class OpcodeGroup
 	)
 	{
 		this.mnemonic = mnemonic;
-		this.operandsIncludeLabel = operandsIncludeLabel;
 		this._opcodeValueFromOperands = opcodeValueFromOperands;
 		this._operandsReadFromBitStream = operandsReadFromBitStream;
 		this._instructionOperandsWriteToBitStream =
@@ -35,7 +33,6 @@ class OpcodeGroup
 		var opcode = this.opcodeByValue(opcodeValue);
 		if (opcode == null)
 		{
-this._opcodeValueFromOperands(operands);
 			throw("Opcode could not be determined from operands!")
 		}
 		return opcode;

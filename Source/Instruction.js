@@ -14,6 +14,13 @@ class Instruction //
 		return new Instruction(this.opcode, this.operands.map(x => x.clone()));
 	}
 
+	doOperandsIncludeLabel()
+	{
+		var returnValue =
+			this.operands.some(x => x.isLabel());
+		return returnValue;
+	}
+
 	operandsReverse()
 	{
 		this.operands = this.operands.reverse();

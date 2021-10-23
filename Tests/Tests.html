@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<script src="../Source/AddressingMode.js"></script>
+<script src="../Source/BitStream.js"></script>
+<script src="../Source/Instruction.js"></script>
+<script src="../Source/InstructionSet.js"></script>
+<script src="../Source/InstructionSet_x86_16.js"></script>
+<script src="../Source/Opcode.js"></script>
+<script src="../Source/OpcodeGroup.js"></script>
+<script src="../Source/Operand.js"></script>
+<script src="../Source/OperandRole.js"></script>
+<script src="../Source/OperandSize.js"></script>
+<script src="../Source/OperandType.js"></script>
+<script src="../Source/Program.js"></script>
+<script src="../Source/Register.js"></script>
+
+<script type="text/javascript">
+
+class TestFixtureMain
+{
+	constructor()
+	{
+		this.instructionSetName = "x86";
+
+		this.tests =
+		[
+			this.assembleMov
+		];
+	}
+
+	assembleMov()
+	{
+		var assemblyCode = "mov ax, ax";
+
+		var program = Program.fromAssemblyCode
+		(
+			"[programName]", this.instructionSetName, assemblyCode
+		);
+
+		// todo - Check the results.
+	}
+}
+
+class TestRunner
+{
+	runAllTests()
+	{
+		var testFixtures =
+		[
+			new TestFixtureMain()
+		];
+
+		var testRunner = this;
+
+		testFixtures.forEach(testFixture =>
+		{
+			testFixture.tests.forEach(test =>
+			{
+				try
+				{
+					test.call(testFixture);
+					testRunner.messageWrite("Test passed: " + test.name);
+				}
+				catch (ex)
+				{
+					testRunner.messageWrite("Test failed: " + test.name);
+					throw ex;
+				}
+			});
+			
+		});
+	}
+
+	messageWrite(message)
+	{
+		console.log(message);
+		document.write(message + "<br />");
+	}
+}
+
+new TestRunner().runAllTests();
+
+</script>
+</body>
+</html>

@@ -91,7 +91,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"adc",
-				false, // operandsIncludeLabel
 				(opds) => 0x10 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(operands),
 				() => { throw("todo"); },
 				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
@@ -109,7 +108,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"add",
-				false, // operandsIncludeLabel
 				(opds) => 0x0 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
 				() => { throw("todo"); },
 				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
@@ -126,7 +124,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"and",
-				false, // operandsIncludeLabel
 				(opds) => 0x20 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
 				() => { throw("todo"); },
 				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
@@ -159,7 +156,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"call",
-				true, // operandsIncludeLabel
 				operandsToOpcodeCall,
 				() => { throw("todo"); },
 				writeInstructionToBitStreamCallOrJump,
@@ -184,7 +180,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"cmp",
-				false, // operandsIncludeLabel
 				(opds) => 0x20 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
 				() => { throw("todo"); },
 				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
@@ -216,7 +211,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"dec",
-				false, // operandsIncludeLabel
 				(opds) => { return 0x48 + (opds[0].value) },
 				() => { throw("todo"); },
 				(ins, bs) => {},
@@ -260,7 +254,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"inc",
-				false, // operandsIncludeLabel
 				(opds) => { return 0x40 + (opds[0].value) },
 				() => { throw("todo"); },
 				(ins, bs) => {},
@@ -279,7 +272,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"int",
-				false, // operandsIncludeLabel
 				(opds) => { return 0xCD; },
 				() => { throw("todo"); },
 				(ins, bs) => {},
@@ -301,7 +293,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"jmp",
-				true, // operandsIncludeLabel
 				operandsToOpcodeJump,
 				() => { throw("todo"); },
 				writeInstructionToBitStreamCallOrJump,
@@ -315,7 +306,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"jo",
-				true, // operandsIncludeLabel
 				(opds) => { return 0x70; },
 				() => { throw("todo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
@@ -327,7 +317,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"jno",
-				true, // operandsIncludeLabel
 				(opds) => { return 0x71; },
 				() => { throw("todo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
@@ -339,7 +328,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"jb",
-				true, // operandsIncludeLabel
 				(opds) => { return 0x72; },
 				() => { throw("todo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
@@ -351,7 +339,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"jnb",
-				true, // operandsIncludeLabel
 				(opds) => { return 0x73; },
 				() => { throw("todo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
@@ -363,7 +350,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"jz",
-				true, // operandsIncludeLabel
 				(opds) => { return 0x74; },
 				() => { throw("todo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
@@ -375,7 +361,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"jnz",
-				true, // operandsIncludeLabel
 				(opds) => { return 0x75; },
 				() => { throw("todo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
@@ -387,7 +372,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"jbe",
-				true, // operandsIncludeLabel
 				(opds) => { return 0x76; },
 				() => { throw("todo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
@@ -399,7 +383,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"jnbe",
-				true, // operandsIncludeLabel
 				(opds) => { return 0x77; },
 				() => { throw("todo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
@@ -411,7 +394,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"js",
-				true, // operandsIncludeLabel
 				(opds) => { return 0x78; },
 				() => { throw("todo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
@@ -423,7 +405,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"jns",
-				true, // operandsIncludeLabel
 				(opds) => { return 0x79; },
 				() => { throw("todo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
@@ -435,7 +416,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"jp",
-				true, // operandsIncludeLabel
 				(opds) => { return 0x7A; },
 				() => { throw("todo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
@@ -447,7 +427,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"jnp",
-				true, // operandsIncludeLabel
 				(opds) => { return 0x7B; },
 				() => { throw("todo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
@@ -459,7 +438,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"jlt",
-				true, // operandsIncludeLabel
 				(opds) => { return 0x7C; },
 				() => { throw("todo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
@@ -471,7 +449,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"jge",
-				true, // operandsIncludeLabel
 				(opds) => { return 0x7D; },
 				() => { throw("todo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
@@ -483,7 +460,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"jle",
-				true, // operandsIncludeLabel
 				(opds) => { return 0x7E; },
 				() => { throw("todo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
@@ -495,7 +471,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"jgt",
-				true, // operandsIncludeLabel
 				(opds) => { return 0x7F; },
 				() => { throw("todo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
@@ -519,7 +494,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"lodsb",
-				false, // operandsIncludeLabel
 				(opds) => { return 0xAC; },
 				() => { throw("todo"); },
 				(ins, bs) => {},
@@ -531,7 +505,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"lodsw",
-				false, // operandsIncludeLabel
 				(opds) => { return 0xAD; },
 				() => { throw("todo"); },
 				(ins, bs) => {},
@@ -554,7 +527,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"mov",
-				false, // operandsIncludeLabel
 				opcodeValueFromOperands_Mov,
 				operandsRead_Mov,
 				operandsWrite_Mov,
@@ -602,7 +574,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"or",
-				false, // operandsIncludeLabel
 				(opds) => 0x08 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
 				() => { throw("todo"); },
 				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
@@ -619,7 +590,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"org",
-				false, // operandsIncludeLabel
 				(opds) => "org", // opcodeFromOperands
 				() => { throw("todo"); },
 				(ins, bs) => {},
@@ -642,7 +612,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"pop",
-				false, // operandsIncludeLabel
 				(opds) => { return 0x58 + (opds[0].value) },
 				() => { throw("todo"); },
 				(ins, bs) => {},
@@ -668,7 +637,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"push",
-				true, // operandsIncludeLabel
 				(opds) =>
 				{
 					var returnOpcode = null;
@@ -706,7 +674,7 @@ class InstructionSet_x86_16
 					new Opcode(0x55, "push bp onto stack"),
 					new Opcode(0x56, "push si onto stack"),
 					new Opcode(0x57, "push di onto stack"),
-					new Opcode(0x6A, "push memory contents at label onto stack")
+					new Opcode(0x6A, "push label address onto stack")
 				]
 			),
 
@@ -730,7 +698,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"ret",
-				false, // operandsIncludeLabel
 				(opds) => { return 0xC2; }, // todo
 				() => { throw("todo"); },
 				(ins, bs) => {},
@@ -759,7 +726,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"sbb",
-				false, // operandsIncludeLabel
 				(opds) => 0x18 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
 				() => { throw("todo"); },
 				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
@@ -790,7 +756,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"sub",
-				false, // operandsIncludeLabel
 				(opds) => 0x28 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
 				() => { throw("todo"); },
 				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
@@ -807,7 +772,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"times",
-				false, // operandsIncludeLabel
 				(opds) => "times",
 				() => { throw("todo"); },
 				(ins, bs) => {},
@@ -819,7 +783,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"use16",
-				false, // operandsIncludeLabel
 				(opds) => "use16",
 				() => { throw("todo"); },
 				(ins, bs) => {},
@@ -849,7 +812,6 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"xor",
-				false, // operandsIncludeLabel
 				(opds) => 0x30 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
 				() => { throw("todo"); },
 				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
@@ -889,7 +851,7 @@ class InstructionSet_x86_16
 		}
 
 		var mnemonicAndOperands =
-			assemblyCode.split(",").join(" ").split(" "); 
+			assemblyCode.split(",").join(" ").split(" ").filter(x => x != ""); 
 
 		var mnemonic = mnemonicAndOperands[0];
 
@@ -1129,9 +1091,12 @@ class InstructionSet_x86_16
 		([
 			[ "al", 0 ],
 			[ "ax", 0 ],
+			[ "bp", 5 ],
 			[ "bx", 3 ],
 			[ "cx", 1 ],
-			[ "dx", 2 ]
+			[ "di", 7 ],
+			[ "dx", 2 ],
+			[ "si", 6 ],
 		]);
 
 		var operandRoles = OperandRole.Instances();

@@ -12,10 +12,20 @@ class Operand
 		return new Operand(this.operandType, this.value);
 	}
 
+	isLabel()
+	{
+		var role = this.operandType.role;
+		var returnValue =
+			(role == OperandRole.Instances().LabelName);
+		return returnValue;
+	}
+
 	toString()
 	{
 		return this.value;
 	}
+
+	// BitStream.
 
 	readFromBitStream(bitStream)
 	{
