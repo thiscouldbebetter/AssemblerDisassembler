@@ -20,16 +20,16 @@ class Operand
 		return returnValue;
 	}
 
-	toString()
+	toStringAssemblyCode()
 	{
-		return this.value;
+		return this.operandType.operandToStringAssemblyCode(this);
 	}
 
 	// BitStream.
 
 	readFromBitStream(bitStream)
 	{
-		throw("todo");
+		throw new Error("todo");
 	}
 
 	writeToBitStream(bitStream)

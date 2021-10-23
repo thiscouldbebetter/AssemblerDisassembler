@@ -1,10 +1,12 @@
 
 class OperandRole
 {
-	constructor(name, code)
+	constructor(name, code, operandToStringAssemblyCode)
 	{
 		this.name = name;
 		this.code = code;
+		this._operandToStringAssemblyCode =
+			operandToStringAssemblyCode;
 	}
 
 	static Instances()
@@ -50,6 +52,11 @@ class OperandRole
 		return returnValue;
 	}
 
+	operandToStringAssemblyCode(operand)
+	{
+		return this._operandToStringAssemblyCode(operand);
+	}
+
 	writeToBitStream(bitStream)
 	{
 		// todo
@@ -61,16 +68,45 @@ class OperandRole_Instances
 {
 	constructor()
 	{
-		this.Data = new OperandRole("Data", "d");
-		this.Immediate =
-			new OperandRole("Immediate", "i");
-		this.LabelName = new OperandRole("LabelName", "l");
-		this.RegisterContents =
-			new OperandRole("RegisterContents", "r");
-		this.MemoryAtAddressInRegister =
-			new OperandRole("MemoryAtAddressInRegister", "rm");
-		this.MemoryAtAddressInRegisterPlusOffset =
-			new OperandRole("MemoryAtAddressInRegisterPlusOffset", "rm");
+		this.Data = new OperandRole
+		(
+			"Data",
+			"d",
+			(operand) => { throw new Error("todo - OperandRole - Data"); }
+		);
+		this.Immediate = new OperandRole
+		(
+			"Immediate",
+			"i",
+			(operand) => { throw new Error("todo - OperandRole - Immediate"); }
+		);
+		this.LabelName = new OperandRole
+		(
+			"LabelName",
+			"l",
+			(operand) => { throw new Error("todo - OperandRole - LabelName"); }
+		);
+		this.RegisterContents = new OperandRole
+		(
+			"RegisterContents",
+			"r",
+			(operand) =>
+			{
+				return operand.value.name;
+			}
+		);
+		this.MemoryAtAddressInRegister = new OperandRole
+		(
+			"MemoryAtAddressInRegister",
+			"rm",
+			(operand) => { throw new Error("todo - OperandRole - MemoryAtAddressInRegister"); }
+		);
+		this.MemoryAtAddressInRegisterPlusOffset = new OperandRole
+		(
+			"MemoryAtAddressInRegisterPlusOffset",
+			"rm",
+			(operand) => { throw new Error("todo - OperandRole - MemoryAtAddressInRegisterPlusOffset"); }
+		);
 
 		this._All =
 		[

@@ -56,6 +56,10 @@ class Register_Instances
 		this.cx = new Register("cx", 1, _16);
 		this.dx = new Register("dx", 2, _16);
 
+		this.bp = new Register("bp", 5, _16);
+		this.di = new Register("di", 7, _16);
+		this.si = new Register("si", 6, _16);
+
 		this._bx = new Register("[bx", 7, _16);
 
 		this._All =
@@ -74,6 +78,10 @@ class Register_Instances
 			this.bx,
 			this.cx,
 			this.dx,
+
+			this.bp,
+			this.di,
+			this.si,
 
 			this._bx,
 		];

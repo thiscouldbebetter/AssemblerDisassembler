@@ -193,8 +193,13 @@ class Program
 
 	toStringAssemblyCode()
 	{
+		var instructionsAsStringsAssemblyCode =
+			this.instructions.map(x => x.toStringAssemblyCode());
+
 		var newline = "\n";
-		var returnValue = this.instructions.join(newline);
-		return returnValue;
+		var programAsAssemblyCode =
+			instructionsAsStringsAssemblyCode.join(newline);
+
+		return programAsAssemblyCode;
 	}
 }

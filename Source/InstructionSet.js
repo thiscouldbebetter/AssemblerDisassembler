@@ -51,7 +51,7 @@ class InstructionSet
 
 		if (this._instructionFromAssemblyCode == null)
 		{
-			throw("Not yet implemented!");
+			throw new Error("Not yet implemented!");
 		}
 		else
 		{
@@ -68,7 +68,7 @@ class InstructionSet
 
 		if (this._instructionReadFromBitStream == null)
 		{
-			throw("Not yet implemented!");
+			throw new Error("Not yet implemented!");
 		}
 		else
 		{

@@ -26,20 +26,56 @@ class TestFixtureMain
 
 		this.tests =
 		[
-			this.assembleMov
+			this.assemble
 		];
 	}
 
-	assembleMov()
+	assemble()
 	{
-		var assemblyCode = "mov ax, ax";
+		var codeToAssembleAsLines =
+		[
+			"mov ax, ax"
+		];
 
-		var program = Program.fromAssemblyCode
+		var codeToAssemble = codeToAssembleAsLines.join("\n");
+
+		var programAssembled = Program.fromAssemblyCode
 		(
-			"[programName]", this.instructionSetName, assemblyCode
+			"[programAssembled]", this.instructionSetName, codeToAssemble
 		);
 
-		// todo - Check the results.
+		var programAssembledAsBytes = programAssembled.toBytes();
+
+		var programParsedFromBytes = Program.fromBytes
+		(
+			"[programParsed]", this.instructionSetName, programAssembledAsBytes
+		);
+
+		var codeDisassembled = programParsedFromBytes.toStringAssemblyCode();
+
+		// The original label names are discarded during assembly.
+		// So assemble and disassemble a second time,
+		// so that the auto-generated labels from the first disassembly
+		// can be matched against the ones from the second disassembly.
+
+		var programReassembled = Program.fromAssemblyCode
+		(
+			"[programReassembled]", this.instructionSetName, codeDisassembled
+		);
+
+		var programReassembledAsBytes = programReassembled.toBytes();
+
+		var programReparsedFromBytes = Program.fromBytes
+		(
+			"[programReparsed]", this.instructionSetName, programReassembledAsBytes
+		);
+
+		var codeDisassembledAgain = programReparsedFromBytes.toStringAssemblyCode();
+
+		if (codeDisassembledAgain != codeDisassembled)
+		{
+			throw new Error("Code was not the same before and after assembly and disassembly!");
+		}
 	}
 }
 

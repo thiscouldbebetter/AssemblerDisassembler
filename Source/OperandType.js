@@ -17,6 +17,11 @@ class OperandType
 		return returnType;
 	}
 
+	operandToStringAssemblyCode(operand)
+	{
+		return this.role.operandToStringAssemblyCode(operand);
+	}
+
 	writeToBitStream(bitStream)
 	{
 		this.role.writeToBitStream(bitStream);

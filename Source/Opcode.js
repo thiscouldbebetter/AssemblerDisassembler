@@ -43,4 +43,9 @@ class Opcode
 			);
 		}
 	}
+
+	operandsReadFromBitStream(bitStream)
+	{
+		return this.group.operandsReadForOpcodeFromBitStream(this, bitStream);
+	}
 }

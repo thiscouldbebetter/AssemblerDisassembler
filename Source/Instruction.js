@@ -32,13 +32,13 @@ class Instruction //
 		return this.opcode.instructionSizeInBytes(instructionSet, this);
 	}
 
-	toString()
+	toStringAssemblyCode()
 	{
 		var opcodeAsString =
-			(this.opcode == null ? "???" : this.opcode.toString());
+			(this.opcode == null ? "???" : this.opcode.group.mnemonic);
 
 		var operandsAsString =
-			this.operands.map(x => x.toString()).join(", ");
+			this.operands.map(x => x.toStringAssemblyCode()).join(", ");
 
 		var returnValue =
 			opcodeAsString + " " + operandsAsString; 

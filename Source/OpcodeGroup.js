@@ -5,14 +5,15 @@ class OpcodeGroup
 	(
 		mnemonic,
 		opcodeValueFromOperands,
-		operandsReadFromBitStream,
+		operandsReadForOpcodeFromBitStream,
 		instructionOperandsWriteToBitStream,
 		opcodes
 	)
 	{
 		this.mnemonic = mnemonic;
 		this._opcodeValueFromOperands = opcodeValueFromOperands;
-		this._operandsReadFromBitStream = operandsReadFromBitStream;
+		this._operandsReadForOpcodeFromBitStream =
+			operandsReadForOpcodeFromBitStream;
 		this._instructionOperandsWriteToBitStream =
 			instructionOperandsWriteToBitStream;
 
@@ -33,14 +34,19 @@ class OpcodeGroup
 		var opcode = this.opcodeByValue(opcodeValue);
 		if (opcode == null)
 		{
-			throw("Opcode could not be determined from operands!")
+			throw new Error("Opcode could not be determined from operands!")
 		}
 		return opcode;
 	}
 
-	operandsReadFromBitStream(bitStream)
+	operandsReadForOpcodeFromBitStream(opcode, bitStream)
 	{
-		return this._operandsReadFromBitStream(bitStream);
+		var operandsSoFar = [];
+		var returnOperands = this._operandsReadForOpcodeFromBitStream
+		(
+			opcode, operandsSoFar, bitStream
+		);
+		return returnOperands;
 	}
 
 	instructionOperandsWriteToBitStream(instruction, bitStream)
