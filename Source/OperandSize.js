@@ -7,6 +7,11 @@ class OperandSize
 		this.sizeInBits = sizeInBits;
 	}
 
+	static fromNameAndSizeInBits(name, sizeInBits)
+	{
+		return new OperandSize(name, sizeInBits);
+	}
+
 	static Instances()
 	{
 		if (OperandSize._instances == null)
@@ -36,11 +41,6 @@ class OperandSize
 		}
 
 		return returnSize;
-	}
-
-	writeOperandValueToBitStream(operandValueToWrite, bitStream)
-	{
-		bitStream.writeIntegerUsingBitWidth(operandValueToWrite, this.sizeInBits);
 	}
 }
 

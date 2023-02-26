@@ -60,6 +60,8 @@ class Register_Instances
 		this.di = new Register("di", 7, _16);
 		this.si = new Register("si", 6, _16);
 
+		// this.sp = new Register("sp", 2, _16); // Just a guess.
+
 		this._bx = new Register("[bx", 7, _16);
 
 		this._All =
@@ -82,6 +84,7 @@ class Register_Instances
 			this.bp,
 			this.di,
 			this.si,
+			// this.sp,
 
 			this._bx,
 		];

@@ -17,6 +17,11 @@ class OperandType
 		return returnType;
 	}
 
+	static fromRoleAndSize(role, size)
+	{
+		return new OperandType(role, size);
+	}
+
 	operandToStringAssemblyCode(operand)
 	{
 		return this.role.operandToStringAssemblyCode(operand);
@@ -27,8 +32,14 @@ class OperandType
 		this.role.writeToBitStream(bitStream);
 	}
 
-	writeOperandValueToBitStream(operandValue, bitStream)
+	writeOperandToBitStream(operand, bitStream)
 	{
-		this.size.writeOperandValueToBitStream(operandValue, bitStream);
+		var operandValueAsInteger =
+			this.role.operandToInteger(operand);
+		var bitWidth = this.size.sizeInBits;
+		bitStream.writeIntegerUsingBitWidth
+		(
+			operandValueAsInteger, bitWidth
+		);
 	}
 }

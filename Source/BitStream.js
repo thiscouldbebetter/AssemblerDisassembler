@@ -121,8 +121,15 @@ class BitStream
 		this.writeIntegerUsingBitWidth(byteToWrite, BitStream.BitsPerByte);
 	}
 
+	writeBytes(bytesToWrite)
+	{
+		bytesToWrite.forEach(x => this.writeByte(x));
+	}
+
 	writeIntegerUsingBitWidth(integerToWrite, bitWidth)
 	{
+		// Note: this does not respect byte boundaries or endianness.
+		// If that is desired, ByteStream should be used instead.
 		for (var i = 0; i < bitWidth; i++)
 		{
 			var placesToShift = bitWidth - 1 - i;

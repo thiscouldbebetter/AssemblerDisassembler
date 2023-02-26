@@ -7,6 +7,11 @@ class Operand
 		this.value = value;
 	}
 
+	static fromTypeAndValue(operandType, value)
+	{
+		return new Operand(operandType, value);
+	}
+
 	clone()
 	{
 		return new Operand(this.operandType, this.value);
@@ -35,6 +40,6 @@ class Operand
 	writeToBitStream(bitStream)
 	{
 		var type = this.operandType;
-		type.writeOperandValueToBitStream(this.value, bitStream);
+		type.writeOperandToBitStream(this, bitStream);
 	}
 }

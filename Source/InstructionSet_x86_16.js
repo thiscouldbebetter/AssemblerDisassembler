@@ -535,9 +535,14 @@ class InstructionSet_x86_16
 					new Opcode(0x89, "move r/m16 r16"),
 					new Opcode(0x8A, "move r8 r/m8"),
 					new Opcode(0x8B, "move r16 r/m16"),
-					new Opcode(0xB8, "move al imm8"),
-					new Opcode(0xB9, "move ax imm16"),
 
+					new Opcode(0xB0, "move al imm8"),
+					new Opcode(0xB8, "move ax imm16"),
+
+					// Not sure where these came from,
+					// but they don't seem to match how FASM does it.
+					// new Opcode(0xB8, "move al imm8"),
+					// new Opcode(0xB9, "move ax imm16"),
 				]
 			),
 
@@ -883,9 +888,13 @@ class InstructionSet_x86_16
 				}
 			}
 			var operandRole = OperandRole.Instances().Data;
-			var operandSize = new OperandSize("data", dataToWriteAsString.length);
-			var operandType = new OperandType(operandRole, operandSize);
-			var operand = new Operand(operandType, dataToWriteAsString);
+			var operandSize = OperandSize.fromNameAndSizeInBits
+			(
+				"data", dataToWriteAsString.length
+			);
+			var operandType =
+				OperandType.fromRoleAndSize(operandRole, operandSize);
+			var operand = Operand.fromTypeAndValue(operandType, dataToWriteAsString);
 			operands = [ operand ];
 		}
 		else if (mnemonic.endsWith(":"))
@@ -896,9 +905,13 @@ class InstructionSet_x86_16
 
 			var operandRole = OperandRole.Instances().LabelName;
 			var operandSizeInBytesAssumed = 2;
-			var operandSize = new OperandSize("label", operandSizeInBytesAssumed);
-			var operandType = new OperandType(operandRole, operandSize);
-			var operand = new Operand(operandType, labelName);
+			var operandSize = OperandSize.fromNameAndSizeInBits
+			(
+				"label", operandSizeInBytesAssumed
+			);
+			var operandType =
+				OperandType.fromRoleAndSize(operandRole, operandSize);
+			var operand = Operand.fromTypeAndValue(operandType, labelName);
 			operands = [ operand ];
 		}
 		else
@@ -976,27 +989,32 @@ class InstructionSet_x86_16
 		var opcodeOffset = null;
 
 		var operand0 = operands[0];
-		var operand1 = operands[1];
-
 		var operand0Type = operand0.operandType;
 		var operand0RoleName = operand0Type.role.name;
 		var operand0SizeInBits = operand0Type.size.sizeInBits;
 
-		var operand1Type = operand1.operandType;
-		var operand1RoleName = operand1Type.role.name;
-		var operand1SizeInBits = operand1Type.size.sizeInBits;
+		if (operands.length == 2)
+		{
+			var operand1 = operands[1];
+			var operand1Type = operand1.operandType;
+			var operand1RoleName = operand1Type.role.name;
+			var operand1SizeInBits = operand1Type.size.sizeInBits;
+		}
 
 		var operandRolesAll = OperandRole.Instances();
 
 		if (operand0RoleName == operandRolesAll.Immediate.name)
 		{
-			throw new Error("Unexpected operand role!");
+			// The other operand is implicitly encoded in the opcode value.
+			opcodeOffset = 0x2F; // todo
 		}
 		else if (operand0RoleName == operandRolesAll.RegisterContents.name)
 		{
 			if (operand1RoleName == operandRolesAll.Immediate.name)
 			{
-				opcodeOffset = 0x30;
+				opcodeOffset = 0x2F; // todo
+				operand1.operandType.size.sizeInBits =
+					operand0.value.widthInBits; // Assumes opd0 is a "RegisterContents".
 			}
 			else if (operand1RoleName == operandRolesAll.RegisterContents.name)
 			{
@@ -1149,7 +1167,7 @@ class InstructionSet_x86_16
 		else
 		{
 			operandRole = operandRoles.LabelName;
-			operandSize = new OperandSize
+			operandSize = OperandSize.fromNameAndSizeInBits
 			(
 				"LabelName", 2 * 8 // Assume two bytes for now.
 			);
@@ -1161,13 +1179,70 @@ class InstructionSet_x86_16
 			throw new Error("Unrecognized operand: " + operandAsString);
 		}
 
-		var operandType = new OperandType(operandRole, operandSize);
-		var returnOperand = new Operand(operandType, operandValue);
+		var operandType =
+			OperandType.fromRoleAndSize(operandRole, operandSize);
+		var returnOperand =
+			Operand.fromTypeAndValue(operandType, operandValue);
 
 		return returnOperand;
 	}
 
 	static operandsReadFromBitStream_Mov(opcode, operands, bitStream)
+	{
+		var doBothOperandsReferenceRegisters = (opcode.value < 0xB0);
+
+		var operandsGet =
+		(
+			doBothOperandsReferenceRegisters
+			? InstructionSet_x86_16.operandsReadFromBitStream_Mov_Registers
+			: InstructionSet_x86_16.operandsReadFromBitStream_Mov_Immediate
+		);
+
+		var operands = operandsGet(opcode, operands, bitStream);
+
+		return operands;
+	}
+
+	static operandsReadFromBitStream_Mov_Immediate
+	(
+		opcode, operands, bitStream
+	)
+	{
+		var lastBitOfOpcode = opcode.value & 1;
+		var operand1WidthInBytes = (lastBitOfOpcode == 0 ? 2 : 1);
+
+		var lastThreeBitsOfOpcode = opcode.value & 7;
+		var registerToSetCode = lastThreeBitsOfOpcode;
+		var operand0Value = registerToSetCode; // todo
+
+		var operand1AsBytes =
+			bitStream.readBytes(operand1WidthInBytes);
+		var operand1AsByteStream =
+			new ByteStreamLittleEndian(operand1AsBytes);
+		var operand1Value =
+			operand1AsByteStream.readIntegerWithWidthInBytes(2);
+
+		var operandRoles = OperandRole.Instances();
+		var operand0Role = operandRoles.RegisterContents;
+		var operand1Role = operandRoles.Immediate;
+
+		var operand0Type =
+			OperandType.fromRoleAndSize(operand0Role, 3);
+		var operand1Type =
+			OperandType.fromRoleAndSize(operand1Role, operand1WidthInBytes * 8);
+
+		var operand0 =
+			Operand.fromTypeAndValue(operand0Type, operand0Value);
+		var operand1 =
+			Operand.fromTypeAndValue(operand1Type, operand1Value);
+
+		operands.push(operand0);
+		operands.push(operand1);
+
+		return operands;
+	}
+
+	static operandsReadFromBitStream_Mov_Registers(opcode, operands, bitStream)
 	{
 		var operand0Type = bitStream.readBit();
 		var operand1Type = bitStream.readBit();
@@ -1181,16 +1256,27 @@ class InstructionSet_x86_16
 			Register.byCodeAndWidthInBits(operand0Value, registerWidth);
 		var operand1Register =
 			Register.byCodeAndWidthInBits(operand1Value, registerWidth);
-		
-		var operand0Type = OperandType.fromOperandAsString(operand0Register.name);
-		var operand1Type = OperandType.fromOperandAsString(operand1Register.name);
 
-		var operand0 = new Operand(operand0Type, operand0Register);
-		var operand1 = new Operand(operand1Type, operand1Register);
+		var operand0Type =
+			OperandType.fromOperandAsString(operand0Register.name);
+		var operand1Type =
+			OperandType.fromOperandAsString(operand1Register.name);
+
+		var operand0 =
+			Operand.fromTypeAndValue(operand0Type, operand0Register);
+		var operand1 =
+			Operand.fromTypeAndValue(operand1Type, operand1Register);
 
 		operands.push(operand0);
 		operands.push(operand1);
-		
+
+		var reverseOperandsFlag = (opcode.value >> 1) & 1;
+		var areOperandsReversed = (reverseOperandsFlag == 0);
+		if (areOperandsReversed)
+		{
+			operands = operands.slice().reverse();
+		}
+
 		return operands;
 	}
 
@@ -1291,10 +1377,59 @@ class InstructionSet_x86_16
 		}
 	}
 
+
 	static instructionOperandsWriteToBitStream_Mov(instruction, bitStream)
+	{
+		var opcode = instruction.opcode;
+		var doBothOperandsReferenceRegisters = (opcode.value < 0xB0);
+
+		var operandsWrite =
+		(
+			doBothOperandsReferenceRegisters
+			? InstructionSet_x86_16.instructionOperandsWriteToBitStream_Mov_Registers
+			: InstructionSet_x86_16.instructionOperandsWriteToBitStream_Mov_Immediate
+		);
+
+		operandsWrite(instruction, bitStream);
+	}
+
+	static instructionOperandsWriteToBitStream_Mov_Registers(instruction, bitStream)
 	{
 		var operands = instruction.operands;
 
+		var operandRolesCodeToWrite =
+			InstructionSet_x86_16.operandRolesCodeGetForOperands(operands);
+
+		if (operandRolesCodeToWrite == null)
+		{
+			// Do nothing.
+		}
+		else
+		{
+			bitStream.writeIntegerUsingBitWidth(operandRolesCodeToWrite, 2);
+		}
+
+		// Depending on opcode, operands may be written
+		// in the reverse of the order
+		// that they appear in the assembly code.
+
+		var opcode = instruction.opcode;
+		var reverseOperandsFlag = (opcode.value >> 1) & 1;
+		var areOperandsReversed = (reverseOperandsFlag == 0);
+		if (areOperandsReversed)
+		{
+			operands = operands.slice().reverse();
+		}
+
+		for (var i = 0; i < operands.length; i++)
+		{
+			var operand = operands[i];
+			operand.writeToBitStream(bitStream);
+		}
+	}
+
+	static operandRolesCodeGetForOperands(operands)
+	{
 		var operandRoles = operands.map(x => x.operandType.role);
 		var operand0Role = operandRoles[0];
 		var operand1Role = operandRoles[1];
@@ -1353,31 +1488,37 @@ class InstructionSet_x86_16
 			}
 		}
 
-		if (operandRolesCodeToWrite == null)
-		{
-			// Do nothing.
-		}
-		else
-		{
-			bitStream.writeIntegerUsingBitWidth(operandRolesCodeToWrite, 2);
-		}
-
-		// Depending on opcode, operands may be written
-		// in the reverse of the order
-		// that they appear in the assembly code.
-
-		var opcode = instruction.opcode;
-		var reverseOperandsFlag = (opcode.value >> 1) & 1;
-		var areOperandsReversed = (reverseOperandsFlag == 0);
-		if (areOperandsReversed)
-		{
-			operands = operands.slice().reverse();
-		}
-
-		for (var i = 0; i < operands.length; i++)
-		{
-			var operand = operands[i];
-			operand.writeToBitStream(bitStream);
-		}
+		return operandRolesCodeToWrite;
 	}
+
+	static instructionOperandsWriteToBitStream_Mov_Immediate
+	(
+		instruction, bitStream
+	)
+	{
+		// throw new Error("todo - Copied from _Registers() and not yet fixed.");
+
+		var operands = instruction.operands;
+		if (operands.length == 2)
+		{
+			// hack
+			// Remove the first operand,
+			// as it is implicitly encoded in the opcode value.
+			operands.splice(0, 1);
+		}
+
+		var operand0 = operands[0];
+
+		var widthInBits = operand0.operandType.size.sizeInBits;
+		var widthInBytes = widthInBits / 8;
+		var operand0AsByteStream = new ByteStreamLittleEndian([]);
+		operand0AsByteStream.writeIntegerWithWidthInBytes
+		(
+			operand0.value, widthInBytes
+		);
+		var operand0AsBytes = operand0AsByteStream.bytes;
+
+		bitStream.writeBytes(operand0AsBytes);
+	}
+
 }

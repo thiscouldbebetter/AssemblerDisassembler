@@ -2,8 +2,11 @@
 <html>
 <body>
 
+<h3>Assembler/Disassembler Automated Test Runner</h3>
+
 <script src="../Source/AddressingMode.js"></script>
 <script src="../Source/BitStream.js"></script>
+<script src="../Source/ByteStreamLittleEndian.js"></script>
 <script src="../Source/Instruction.js"></script>
 <script src="../Source/InstructionSet.js"></script>
 <script src="../Source/InstructionSet_x86_16.js"></script>
@@ -16,107 +19,20 @@
 <script src="../Source/Program.js"></script>
 <script src="../Source/Register.js"></script>
 
+<script src="Assert.js"></script>
+<script src="TestRunner.js"></script>
+
+<script src="Fixtures/TestFixtureAssembleDisassembleAndCompare.js"></script>
+
 <script type="text/javascript">
 
-class TestFixtureMain
-{
-	constructor()
-	{
-		this.instructionSetName = "x86";
+	var testFixturesToRun = 
+	[
+		new TestFixtureAssembleDisassembleAndCompare()
+	];
 
-		this.tests =
-		[
-			this.assemble
-		];
-	}
-
-	assemble()
-	{
-		var codeToAssembleAsLines =
-		[
-			"mov ax, ax"
-		];
-
-		var codeToAssemble = codeToAssembleAsLines.join("\n");
-
-		var programAssembled = Program.fromAssemblyCode
-		(
-			"[programAssembled]", this.instructionSetName, codeToAssemble
-		);
-
-		var programAssembledAsBytes = programAssembled.toBytes();
-
-		var programParsedFromBytes = Program.fromBytes
-		(
-			"[programParsed]", this.instructionSetName, programAssembledAsBytes
-		);
-
-		var codeDisassembled = programParsedFromBytes.toStringAssemblyCode();
-
-		// The original label names are discarded during assembly.
-		// So assemble and disassemble a second time,
-		// so that the auto-generated labels from the first disassembly
-		// can be matched against the ones from the second disassembly.
-
-		var programReassembled = Program.fromAssemblyCode
-		(
-			"[programReassembled]", this.instructionSetName, codeDisassembled
-		);
-
-		var programReassembledAsBytes = programReassembled.toBytes();
-
-		var programReparsedFromBytes = Program.fromBytes
-		(
-			"[programReparsed]", this.instructionSetName, programReassembledAsBytes
-		);
-
-		var codeDisassembledAgain = programReparsedFromBytes.toStringAssemblyCode();
-
-		if (codeDisassembledAgain != codeDisassembled)
-		{
-			throw new Error("Code was not the same before and after assembly and disassembly!");
-		}
-	}
-}
-
-class TestRunner
-{
-	runAllTests()
-	{
-		var testFixtures =
-		[
-			new TestFixtureMain()
-		];
-
-		var testRunner = this;
-
-		testFixtures.forEach(testFixture =>
-		{
-			testFixture.tests.forEach(test =>
-			{
-				try
-				{
-					test.call(testFixture);
-					testRunner.messageWrite("Test passed: " + test.name);
-				}
-				catch (ex)
-				{
-					testRunner.messageWrite("Test failed: " + test.name);
-					throw ex;
-				}
-			});
-			
-		});
-	}
-
-	messageWrite(message)
-	{
-		console.log(message);
-		document.write(message + "<br />");
-	}
-}
-
-new TestRunner().runAllTests();
+	var testRunner = new TestRunner(testFixturesToRun);
+	testRunner.runAllTests();
 
 </script>
 </body>
