@@ -86,6 +86,11 @@ class BitStream
 		return returnValue;
 	}
 
+	readNibble()
+	{
+		return this.readBitsAsInteger(4);
+	}
+
 	writeAlignOnBoundary(bitModulusToAlignOn)
 	{
 		var bitOffsetAbsolute =
@@ -126,6 +131,15 @@ class BitStream
 		bytesToWrite.forEach(x => this.writeByte(x));
 	}
 
+	writeBytesLittleEndian(bytesToWrite)
+	{
+		for (var i = bytesToWrite.length - 1; i >= 0; i--)
+		{
+			var byteToWrite = bytesToWrite[i];
+			this.writeByte(byteToWrite);
+		}
+	}
+
 	writeIntegerUsingBitWidth(integerToWrite, bitWidth)
 	{
 		// Note: this does not respect byte boundaries or endianness.
@@ -136,6 +150,11 @@ class BitStream
 			var bitToWrite = (integerToWrite >> placesToShift) & 1;
 			this.writeBit(bitToWrite);
 		}
+	}
+
+	writeNibble(nibbleToWrite)
+	{
+		this.writeIntegerUsingBitWidth(nibbleToWrite, 4);
 	}
 
 	writeString(stringToWrite)

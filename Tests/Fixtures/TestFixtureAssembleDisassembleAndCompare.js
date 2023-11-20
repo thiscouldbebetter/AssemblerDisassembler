@@ -8,11 +8,54 @@ class TestFixtureAssembleDisassembleAndCompare
 
 		this.tests =
 		[
-			this.mov
+			this.adc,
+			this.mov,
 		];
 	}
 
 	// Tests.
+
+	// adc
+
+	adc()
+	{
+		this.adc_1_ImmediateToRegister();
+		this.adc_2_RegisterToRegister_General();
+		this.adc_3_RegisterToRegister_Special();
+	}
+
+	adc_1_ImmediateToRegister()
+	{
+		var codeToAssemble = `
+			adc ax, 1
+			adc ax, 2
+			adc ax, 256
+		`;
+
+		this.assembleDisassembleAndCompare(codeToAssemble);
+	}
+
+	adc_2_RegisterToRegister_General()
+	{
+		var codeToAssemble = `
+			adc ax, bx
+			adc cx, dx
+		`;
+
+		this.assembleDisassembleAndCompare(codeToAssemble);
+	}
+
+	adc_3_RegisterToRegister_Special()
+	{
+		var codeToAssemble = `
+			adc bp, bp
+		`;
+
+		this.assembleDisassembleAndCompare(codeToAssemble);
+	}
+
+
+	// mov
 
 	mov()
 	{

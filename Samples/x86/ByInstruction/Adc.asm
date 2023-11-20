@@ -1,3 +1,28 @@
+db 'adc ax 1',0
+adc ax, 1
+db 'adc ax 2',0
+adc ax, 2
+db 'adc ax 256',0
+adc ax, 256
+
+db 'adc ax 42',0
+adc ax, 42
+db 'adc bx 42',0
+adc bx, 42
+db 'adc cx 42',0
+adc cx, 42
+db 'adc dx 42',0
+adc dx, 42
+
+db 'adc ax 256',0
+adc ax, 256
+db 'adc bx 256',0
+adc bx, 256
+db 'adc cx 256',0
+adc cx, 256
+db 'adc dx 256',0
+adc dx, 256
+
 db 'adc ax ax',0
 adc ax, ax
 db 'adc ax bx',0

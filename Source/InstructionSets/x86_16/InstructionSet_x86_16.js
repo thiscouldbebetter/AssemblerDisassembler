@@ -11,10 +11,10 @@ class InstructionSet_x86_16
 	{
 		// Operand parsing.
 
-		var opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor =
-			InstructionSet_x86_16.opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor;
-		var instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor =
-			InstructionSet_x86_16.instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor;
+		var opcodeOffsetFromOperands_Add_And_Or_Sbb_Sub_Xor =
+			InstructionSet_x86_16.opcodeOffsetFromOperands_Add_And_Or_Sbb_Sub_Xor;
+		var instructionOperandsWriteToBitStream_Add_Or_Sbb_Sub_Xor =
+			InstructionSet_x86_16.instructionOperandsWriteToBitStream_Add_Or_Sbb_Sub_Xor;
 
 		var opcodeValueFromOperands_Mov = InstructionSet_x86_16.opcodeValueFromOperands_Mov;
 		var operandsRead_Mov = InstructionSet_x86_16.operandsReadFromBitStream_Mov;
@@ -88,29 +88,18 @@ class InstructionSet_x86_16
 			// Add with carry.
 			*/
 
-			new OpcodeGroup
-			(
-				"adc",
-				(opds) => 0x10 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(operands),
-				() => { throw new Error("todo"); },
-				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
-				[
-					new Opcode(0x10, "add with carry r/m8 r8"),
-					new Opcode(0x11, "add with carry r/m16 r16"),
-					new Opcode(0x12, "add with carry r8 r/m8"),
-					new Opcode(0x13, "add with carry r16 r/m16"),
-					new Opcode(0x14, "add with carry al imm8"),
-					new Opcode(0x15, "add with carry ax imm16")
-				]
-			),
+			new OpcodeAdc().opcodeGroupBuild(),
 
 			// adds
 			new OpcodeGroup
 			(
 				"add",
-				(opds) => 0x0 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
-				() => { throw new Error("todo"); },
-				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
+				(opds) => 0x0 + opcodeOffsetFromOperands_Add_And_Or_Sbb_Sub_Xor(opds),
+				() =>
+				{
+					throw new Error("todo - add");
+				},
+				(ins, bs) => instructionOperandsWriteToBitStream_Add_Or_Sbb_Sub_Xor(ins, bs),
 				[
 					new Opcode(0x00, "add r/m8 r8"),
 					new Opcode(0x01, "add r/m16 r16"),
@@ -124,9 +113,9 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"and",
-				(opds) => 0x20 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
-				() => { throw new Error("todo"); },
-				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
+				(opds) => 0x20 + opcodeOffsetFromOperands_Add_And_Or_Sbb_Sub_Xor(opds),
+				() => { throw new Error("todo - and"); },
+				(ins, bs) => instructionOperandsWriteToBitStream_Add_Or_Sbb_Sub_Xor(ins, bs),
 				[
 					new Opcode(0x20, "and r/m8 r8"),
 					new Opcode(0x21, "and r/m16 r16"),
@@ -157,7 +146,7 @@ class InstructionSet_x86_16
 			(
 				"call",
 				operandsToOpcodeCall,
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - call"); },
 				writeInstructionToBitStreamCallOrJump,
 				[
 					new Opcode(0x9A, "call interrupt routine"),
@@ -180,9 +169,9 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"cmp",
-				(opds) => 0x20 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
-				() => { throw new Error("todo"); },
-				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
+				(opds) => 0x20 + opcodeOffsetFromOperands_Add_And_Or_Sbb_Sub_Xor(opds),
+				() => { throw new Error("todo - cmp"); },
+				(ins, bs) => instructionOperandsWriteToBitStream_Add_Or_Sbb_Sub_Xor(ins, bs),
 				[
 					new Opcode(0x38, "compare r/m8 r8"), // 0x05, 0x80/0..., 0x83/0
 					new Opcode(0x39, "compare r/m16 r16"),
@@ -212,7 +201,7 @@ class InstructionSet_x86_16
 			(
 				"dec",
 				(opds) => { return 0x48 + (opds[0].value) },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - dec"); },
 				(ins, bs) => {},
 				[
 					new Opcode(0x48, "decrement ax"),
@@ -255,7 +244,7 @@ class InstructionSet_x86_16
 			(
 				"inc",
 				(opds) => { return 0x40 + (opds[0].value) },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - inc"); },
 				(ins, bs) => {},
 				[
 					new Opcode(0x40, "increment ax"),
@@ -273,7 +262,7 @@ class InstructionSet_x86_16
 			(
 				"int",
 				(opds) => { return 0xCD; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - int"); },
 				(ins, bs) => {},
 				[
 					new Opcode(0xCD, "call interrupt routine"),
@@ -294,7 +283,7 @@ class InstructionSet_x86_16
 			(
 				"jmp",
 				operandsToOpcodeJump,
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - jmp"); },
 				writeInstructionToBitStreamCallOrJump,
 				[
 					new Opcode(0xE9, "jump rel16"),
@@ -307,7 +296,7 @@ class InstructionSet_x86_16
 			(
 				"jo",
 				(opds) => { return 0x70; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - jo"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
 				[
 					new Opcode(0x70, "jump if 0"),
@@ -318,7 +307,7 @@ class InstructionSet_x86_16
 			(
 				"jno",
 				(opds) => { return 0x71; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - jno"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
 				[
 					new Opcode(0x71, "jump if not 0"),
@@ -329,7 +318,7 @@ class InstructionSet_x86_16
 			(
 				"jb",
 				(opds) => { return 0x72; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - jb"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
 				[
 					new Opcode(0x72, "jb/nae/c"),
@@ -340,7 +329,7 @@ class InstructionSet_x86_16
 			(
 				"jnb",
 				(opds) => { return 0x73; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - jnb"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
 				[
 					new Opcode(0x73, "jnb/ae/nc"),
@@ -351,7 +340,7 @@ class InstructionSet_x86_16
 			(
 				"jz",
 				(opds) => { return 0x74; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - jz"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
 				[
 					new Opcode(0x74, "jz/e_b"),
@@ -362,7 +351,7 @@ class InstructionSet_x86_16
 			(
 				"jnz",
 				(opds) => { return 0x75; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - jnz"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
 				[
 					new Opcode(0x75, "jnz/e_b"),
@@ -373,7 +362,7 @@ class InstructionSet_x86_16
 			(
 				"jbe",
 				(opds) => { return 0x76; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - jbe"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
 				[
 					new Opcode(0x76, "jbe"),
@@ -384,7 +373,7 @@ class InstructionSet_x86_16
 			(
 				"jnbe",
 				(opds) => { return 0x77; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - jnbe"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
 				[
 					new Opcode(0x77, "jnbe/a"),
@@ -395,7 +384,7 @@ class InstructionSet_x86_16
 			(
 				"js",
 				(opds) => { return 0x78; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - js"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
 				[
 					new Opcode(0x78, "js"),
@@ -406,7 +395,7 @@ class InstructionSet_x86_16
 			(
 				"jns",
 				(opds) => { return 0x79; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - jns"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
 				[
 					new Opcode(0x79, "jns"),
@@ -417,7 +406,7 @@ class InstructionSet_x86_16
 			(
 				"jp",
 				(opds) => { return 0x7A; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - jp"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
 				[
 					new Opcode(0x7A, "jp/e"),
@@ -428,7 +417,7 @@ class InstructionSet_x86_16
 			(
 				"jnp",
 				(opds) => { return 0x7B; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - jnp"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
 				[
 					new Opcode(0x7B, "jnp/po"),
@@ -439,7 +428,7 @@ class InstructionSet_x86_16
 			(
 				"jlt",
 				(opds) => { return 0x7C; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - jlt"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
 				[
 					new Opcode(0x7C, "jump if less than"),
@@ -450,7 +439,7 @@ class InstructionSet_x86_16
 			(
 				"jge",
 				(opds) => { return 0x7D; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - jge"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
 				[
 					new Opcode(0x7D, "jump if greater than or equal"),
@@ -461,7 +450,7 @@ class InstructionSet_x86_16
 			(
 				"jle",
 				(opds) => { return 0x7E; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - jle"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
 				[
 					new Opcode(0x7E, "jump if less than or equal"),
@@ -472,7 +461,7 @@ class InstructionSet_x86_16
 			(
 				"jgt",
 				(opds) => { return 0x7F; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - jgt"); },
 				(ins, bs) => { bs.writeIntegerUsingBitWidth(ins.opcode.value, 8); },
 				[
 					new Opcode(0x7F, "jump if greater than"),
@@ -495,7 +484,7 @@ class InstructionSet_x86_16
 			(
 				"lodsb",
 				(opds) => { return 0xAC; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - lodsb"); },
 				(ins, bs) => {},
 				[
 					new Opcode(0xAC, "load string byte"),
@@ -506,13 +495,13 @@ class InstructionSet_x86_16
 			(
 				"lodsw",
 				(opds) => { return 0xAD; },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - lodsw"); },
 				(ins, bs) => {},
 				[
 					new Opcode(0xAD, "load string byte"),
 				]
 			),
-
+ 
 			/*
 
 			// loops
@@ -579,9 +568,9 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"or",
-				(opds) => 0x08 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
-				() => { throw new Error("todo"); },
-				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
+				(opds) => 0x08 + opcodeOffsetFromOperands_Add_And_Or_Sbb_Sub_Xor(opds),
+				() => { throw new Error("todo - or"); },
+				(ins, bs) => instructionOperandsWriteToBitStream_Add_Or_Sbb_Sub_Xor(ins, bs),
 				[
 					new Opcode(0x08, "or r/m8 r8"),
 					new Opcode(0x09, "or r/m16 r16"),
@@ -596,7 +585,7 @@ class InstructionSet_x86_16
 			(
 				"org",
 				(opds) => "org", // opcodeFromOperands
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - org"); },
 				(ins, bs) => {},
 				[
 					new Opcode("org", "set offset of program"),
@@ -618,7 +607,7 @@ class InstructionSet_x86_16
 			(
 				"pop",
 				(opds) => { return 0x58 + (opds[0].value) },
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - pop"); },
 				(ins, bs) => {},
 				[
 					new Opcode(0x58, "pop ax from stack"),
@@ -704,7 +693,7 @@ class InstructionSet_x86_16
 			(
 				"ret",
 				(opds) => { return 0xC2; }, // todo
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - ret"); },
 				(ins, bs) => {},
 				[
 					new Opcode(0xC2, "return from near procedure"),
@@ -731,9 +720,9 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"sbb",
-				(opds) => 0x18 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
-				() => { throw new Error("todo"); },
-				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
+				(opds) => 0x18 + opcodeOffsetFromOperands_Add_And_Or_Sbb_Sub_Xor(opds),
+				() => { throw new Error("todo - sbb"); },
+				(ins, bs) => instructionOperandsWriteToBitStream_Add_Or_Sbb_Sub_Xor(ins, bs),
 				[
 					new Opcode(0x18, "subtraction with borrow r/m8 r8"),
 					new Opcode(0x19, "subtraction with borrow r/m16 r16"),
@@ -761,9 +750,9 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"sub",
-				(opds) => 0x28 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
-				() => { throw new Error("todo"); },
-				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
+				(opds) => 0x28 + opcodeOffsetFromOperands_Add_And_Or_Sbb_Sub_Xor(opds),
+				() => { throw new Error("todo - sub"); },
+				(ins, bs) => instructionOperandsWriteToBitStream_Add_Or_Sbb_Sub_Xor(ins, bs),
 				[
 					new Opcode(0x28, "subtract r/m8 r8"),
 					new Opcode(0x29, "subtract r/m16 r16"),
@@ -778,7 +767,7 @@ class InstructionSet_x86_16
 			(
 				"times",
 				(opds) => "times",
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - times"); },
 				(ins, bs) => {},
 				[
 					new Opcode("times", "repeat next instruction")
@@ -789,7 +778,7 @@ class InstructionSet_x86_16
 			(
 				"use16",
 				(opds) => "use16",
-				() => { throw new Error("todo"); },
+				() => { throw new Error("todo - use16"); },
 				(ins, bs) => {},
 				[
 					new Opcode("use16", "use 16-bit instructions")
@@ -817,9 +806,9 @@ class InstructionSet_x86_16
 			new OpcodeGroup
 			(
 				"xor",
-				(opds) => 0x30 + opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(opds),
-				() => { throw new Error("todo"); },
-				(ins, bs) => instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor(ins, bs),
+				(opds) => 0x30 + opcodeOffsetFromOperands_Add_And_Or_Sbb_Sub_Xor(opds),
+				() => { throw new Error("todo - xor"); },
+				(ins, bs) => instructionOperandsWriteToBitStream_Add_Or_Sbb_Sub_Xor(ins, bs),
 				[
 					new Opcode(0x30, "xor r/m8 r8"),
 					new Opcode(0x31, "xor r/m16 r16"),
@@ -940,7 +929,7 @@ class InstructionSet_x86_16
 		return instruction;
 	}
 
-	static opcodeOffsetFromOperands_Adc_Add_And_Or_Sbb_Sub_Xor(operands)
+	static opcodeOffsetFromOperands_Add_And_Or_Sbb_Sub_Xor(operands)
 	{
 		var opcodeOffset = null;
 
@@ -1187,6 +1176,8 @@ class InstructionSet_x86_16
 		return returnOperand;
 	}
 
+	// operandsReadFromBitStream.
+
 	static operandsReadFromBitStream_Mov(opcode, operands, bitStream)
 	{
 		var doBothOperandsReferenceRegisters = (opcode.value < 0xB0);
@@ -1280,7 +1271,7 @@ class InstructionSet_x86_16
 		return operands;
 	}
 
-	static instructionOperandsWriteToBitStream_Adc_Add_Or_Sbb_Sub_Xor
+	static instructionOperandsWriteToBitStream_Add_Or_Sbb_Sub_Xor
 	(
 		instruction, bitStream
 	)
@@ -1520,5 +1511,4 @@ class InstructionSet_x86_16
 
 		bitStream.writeBytes(operand0AsBytes);
 	}
-
 }

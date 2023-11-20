@@ -96,10 +96,13 @@ class InstructionSet_Instances
 	{
 		
 		this.x86 = InstructionSet_x86_16.build();
+		this.mos6502 = InstructionSet_Mos6502.build();
 
 		this._All =
 		[
-			this.x86
+			this.x86,
+
+			this.mos6502,
 		];
 
 		this._AllByName = new Map(this._All.map(x => [x.name, x]));

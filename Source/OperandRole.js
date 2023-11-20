@@ -102,11 +102,8 @@ class OperandRole_Instances
 		(
 			"Immediate",
 			"i",
-			(operand) =>
-			{
-				return operand.value;
-			},
-			(operand) => { throw new Error("todo - OperandRole - Immediate"); }
+			(operand) => "" + operand.value, // operandToStringAssemblyCode,
+			(operand) => operand.value // operandToInteger
 		);
 		this.LabelName = new OperandRole
 		(
